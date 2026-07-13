@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/translate", "destination": "/api/index" },
+    { "source": "/health", "destination": "/api/index" },
+    { "source": "/videos/:path*", "destination": "/backend/videos/:path*" }
+  ]
+}
