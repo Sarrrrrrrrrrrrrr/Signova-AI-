@@ -1,0 +1,8 @@
+Isi folder ini dengan klip video isyarat BISINDO (.mp4, landscape, 2-4 detik).
+Nama file harus sama dengan yang ada di dictionary.json, contoh:
+  selamat_pagi.mp4, terima_kasih.mp4, tolong.mp4, ...
+Untuk fingerspelling, buat subfolder huruf/ berisi a.mp4 ... z.mp4.
+
+Sumber klip: rekam bersama komunitas Tuli / validator BISINDO.
+Selama folder ini kosong, demo TETAP JALAN — gloss ditampilkan
+sebagai teks besar (mode placeholder), jadi aman untuk uji parser.

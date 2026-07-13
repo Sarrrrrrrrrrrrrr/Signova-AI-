@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signova AI — Demo Interpreter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#0F766E; --teal-100:#D6F2EF; --dark:#133029;
+    --gray:#5A6B69; --bg:#FAFAF7; --white:#fff; --amber:#F59E0B;
+    --line:#D9E3E1;
+  }
+  *{box-sizing:border-box;margin:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+  header{display:flex;justify-content:space-between;align-items:center;padding:20px 48px;border-bottom:1.5px solid var(--line)}
+  header .logo{font-weight:700;font-size:22px;color:var(--teal)}
+  header .status{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;
+    padding:8px 16px;border-radius:999px;background:var(--teal-100);color:var(--teal)}
+  header .status .dot{width:10px;height:10px;border-radius:50%;background:var(--teal)}
+  header .status.listening{background:#FEF3D8;color:#9A6203}
+  header .status.listening .dot{background:var(--amber);animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+
+  main{display:grid;grid-template-columns:1.7fr 1fr;gap:24px;padding:28px 48px;max-width:1280px;margin:0 auto}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+
+  /* Panggung isyarat */
+  .stage{background:#162826;border-radius:20px;min-height:480px;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;position:relative}
+  .stage video{max-width:100%;max-height:420px;border-radius:12px;display:none}
+  .stage .idle{color:#9FC4BF;font-size:17px;text-align:center;line-height:1.6}
+  .gloss-big{display:none;color:#fff;font-size:56px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;text-align:center}
+  .gloss-sub{display:none;color:#8FD9CF;font-size:15px;font-weight:600}
+  .now{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    background:rgba(255,255,255,.12);color:#fff;font-size:14px;font-weight:600;
+    padding:8px 18px;border-radius:9px;display:none;white-space:nowrap}
+
+  /* Panel kanan */
+  .panel{display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:12px;letter-spacing:.08em;color:var(--gray);margin-bottom:10px}
+  #caption{font-size:19px;font-weight:600;line-height:1.5;min-height:56px}
+  #glossRow{display:flex;flex-wrap:wrap;gap:8px;min-height:34px}
+  .chip{background:var(--teal-100);color:var(--teal);font-size:14px;font-weight:600;
+    padding:6px 12px;border-radius:8px}
+  .chip.eja{background:#FEF3D8;color:#9A6203}
+  .chip.active{background:var(--teal);color:#fff}
+
+  .typeRow{display:flex;gap:8px}
+  .typeRow input{flex:1;padding:13px 16px;border:1.5px solid var(--line);border-radius:11px;
+    font:inherit;font-size:15px;background:var(--white)}
+  .typeRow input:focus{outline:3px solid var(--teal-100);border-color:var(--teal)}
+  .btn{border:0;border-radius:11px;padding:13px 20px;font:inherit;font-weight:600;
+    font-size:15px;cursor:pointer;background:var(--teal);color:#fff}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:focus-visible{outline:3px solid var(--amber)}
+
+  .micWrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+  #micBtn{width:96px;height:96px;border-radius:50%;border:0;cursor:pointer;font-size:38px;
+    background:var(--teal);color:#fff;box-shadow:0 8px 24px rgba(15,118,110,.35);transition:.2s}
+  #micBtn.listening{background:var(--amber);box-shadow:0 8px 28px rgba(245,158,11,.45)}
+  #micBtn:focus-visible{outline:4px solid var(--teal-100)}
+  .micWrap small{color:var(--gray)}
+  .cov{font-size:13px;color:var(--gray)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Signova AI <span style="color:var(--gray);font-weight:400;font-size:15px">· Demo Interpreter</span></div>
+  <div class="status" id="status"><span class="dot"></span><span id="statusText">Siap</span></div>
+</header>
+
+<main>
+  <!-- Panggung: video isyarat / gloss besar sebagai fallback -->
+  <section class="stage" aria-label="Peragaan bahasa isyarat">
+    <p class="idle" id="idle">Tekan tombol mikrofon dan mulai bicara,<br>atau ketik kalimat di panel kanan.<br><br>🖐 Urutan isyarat BISINDO akan diperagakan di sini.</p>
+    <video id="player" playsinline muted></video>
+    <div class="gloss-big" id="glossBig"></div>
+    <div class="gloss-sub" id="glossSub"></div>
+    <div class="now" id="nowLabel"></div>
+  </section>
+
+  <!-- Panel kontrol -->
+  <aside class="panel">
+    <div class="card">
+      <h3>TEKS UCAPAN (LIVE CAPTION)</h3>
+      <div id="caption">—</div>
+    </div>
+
+    <div class="card">
+      <h3>URUTAN GLOSS BISINDO</h3>
+      <div id="glossRow"></div>
+      <p class="cov" id="coverage"></p>
+    </div>
+
+    <div class="typeRow">
+      <input id="typeInput" type="text" placeholder="Atau ketik pesan di sini…"
+             aria-label="Ketik pesan untuk diterjemahkan">
+      <button class="btn" id="sendBtn">Terjemahkan</button>
+    </div>
+
+    <div class="micWrap">
+      <button id="micBtn" aria-label="Mulai atau hentikan rekaman suara">🎙</button>
+      <small id="micHint">Ketuk untuk mulai merekam</small>
+    </div>
+  </aside>
+</main>
+
+<script>
+const API = '';                    // sama-origin (diserve FastAPI)
+const $ = id => document.getElementById(id);
+const GLOSS_MS = 1400;             // durasi tampil per gloss saat klip tidak ada
+
+// ---------- Speech recognition (Web Speech API, id-ID) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+
+if (SR) {
+  rec = new SR();
+  rec.lang = 'id-ID';
+  rec.interimResults = true;
+  rec.continuous = false;
+
+  rec.onresult = e => {
+    let final = '', interim = '';
+    for (const r of e.results) (r.isFinal ? final += r[0].transcript : interim += r[0].transcript);
+    $('caption').textContent = `"${(final || interim).trim()}"`;
+    if (final.trim()) translate(final.trim());
+  };
+  rec.onend = () => setListening(false);
+  rec.onerror = ev => { setListening(false); setStatus('Mic error: ' + ev.error, false); };
+}
+
+function setListening(on){
+  listening = on;
+  $('micBtn').classList.toggle('listening', on);
+  $('micHint').textContent = on ? 'Mendengarkan… ketuk untuk berhenti' : 'Ketuk untuk mulai merekam';
+  setStatus(on ? '🎙 Mendengarkan…' : 'Siap', on);
+}
+function setStatus(text, active){
+  $('statusText').textContent = text;
+  $('status').classList.toggle('listening', !!active);
+}
+
+$('micBtn').onclick = () => {
+  if (!rec) { alert('Browser ini tidak mendukung Web Speech API. Gunakan Chrome, atau pakai input ketik.'); return; }
+  listening ? rec.stop() : (rec.start(), setListening(true));
+};
+
+// ---------- Input ketik (fallback andal untuk demo) ----------
+$('sendBtn').onclick = () => {
+  const t = $('typeInput').value.trim();
+  if (!t) return;
+  $('caption').textContent = `"${t}"`;
+  translate(t);
+};
+$('typeInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('sendBtn').click(); });
+
+// ---------- Panggil backend ----------
+async function translate(text){
+  setStatus('Memproses…', true);
+  try {
+    const res = await fetch(API + '/translate', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    renderGloss(data);
+    await playSequence(data.clips);
+    setStatus('Siap', false);
+  } catch (err) {
+    setStatus('Gagal terhubung ke server', false);
+    $('caption').textContent = 'Tidak bisa menghubungi backend. Pastikan uvicorn berjalan.';
+  }
+}
+
+function renderGloss(data){
+  const row = $('glossRow'); row.innerHTML = '';
+  data.clips.forEach((c,i) => {
+    const s = document.createElement('span');
+    s.className = 'chip' + (c.mode === 'eja' ? ' eja' : '');
+    s.id = 'chip-' + i;
+    s.textContent = c.mode === 'eja' ? c.gloss + ' (eja)' : c.gloss;
+    row.appendChild(s);
+  });
+  $('coverage').textContent =
+    `Cakupan kamus: ${Math.round(data.coverage*100)}% · ${data.clips.length} gloss`;
+}
+
+// ---------- Pemutar urutan isyarat ----------
+const player = $('player');
+
+async function playSequence(clips){
+  $('idle').style.display = 'none';
+  for (let i = 0; i < clips.length; i++) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    const chip = $('chip-' + i); if (chip) chip.classList.add('active');
+    const c = clips[i];
+    $('nowLabel').style.display = 'block';
+    $('nowLabel').textContent = 'Memperagakan: "' + c.gloss.toUpperCase() + '"';
+
+    if (c.mode === 'video' && await playClip('/videos/' + c.file)) continue;
+
+    if (c.mode === 'eja') {                    // fingerspelling huruf per huruf
+      for (const l of c.letters) {
+        if (l.file && await playClip('/videos/' + l.file, 700)) continue;
+        await showGloss(l.letter, 'ejaan huruf', 700);
+      }
+      continue;
+    }
+    // fallback terakhir: tampilkan gloss sebagai teks besar
+    await showGloss(c.gloss, c.mode === 'teks' ? 'ditampilkan sebagai teks' : 'klip belum tersedia — placeholder');
+  }
+  $('nowLabel').style.display = 'none';
+}
+
+function playClip(src, timeoutMs){
+  return new Promise(resolve => {
+    hideGloss();
+    player.style.display = 'block';
+    player.src = src;
+    let done = false;
+    const finish = ok => { if (!done){ done = true; player.style.display='none'; resolve(ok); } };
+    player.onended = () => finish(true);
+    player.onerror = () => finish(false);        // klip 404 -> fallback teks
+    player.play().catch(() => finish(false));
+    if (timeoutMs) setTimeout(() => finish(true), timeoutMs + 4000);
+  });
+}
+
+function showGloss(text, sub, ms = GLOSS_MS){
+  return new Promise(r => {
+    player.style.display = 'none';
+    $('glossBig').style.display = 'block';
+    $('glossBig').textContent = text;
+    $('glossSub').style.display = 'block';
+    $('glossSub').textContent = sub;
+    setTimeout(() => { hideGloss(); r(); }, ms);
+  });
+}
+function hideGloss(){
+  $('glossBig').style.display = 'none';
+  $('glossSub').style.display = 'none';
+}
+</script>
+</body>
+</html>

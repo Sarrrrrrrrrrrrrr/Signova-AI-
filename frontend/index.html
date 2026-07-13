@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="id" data-reduce-motion="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Signova AI — penerjemah dua arah BISINDO: suara menjadi isyarat, isyarat menjadi suara.">
+<meta name="theme-color" content="#0F766E">
+<meta name="color-scheme" content="light">
+<title>Signova AI — Penerjemah Dua Arah BISINDO</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+<script>
+/* Muat preferensi "kurangi animasi" sebelum render agar tidak ada kilatan animasi. */
+try{ if(localStorage.getItem('signova-rm')==='1'){ document.documentElement.setAttribute('data-reduce-motion','1'); } }catch(e){}
+</script>
+
+<style>
+/* =====================================================================
+   SIGNOVA AI — sistem desain "quiet dev-tool minimalism"
+   Border-first (hairline 1px), satu aksen teal, amber hanya untuk
+   status aktif/merekam. Semua gerak dibungkus prefers-reduced-motion.
+   ===================================================================== */
+
+:root{
+  /* -- warna ----------------------------------------------------- */
+  --teal-700:#0F766E;
+  --teal-100:#D6F2EF;
+  --dark-900:#133029;
+  --gray-500:#5A6B69;
+  --cream-50:#FAFAF7;
+  --amber-500:#F59E0B;
+  --surface:#FFFFFF;
+  --hairline:#E7E9E8;
+  --text-900:#133029;
+  --text-600:#3A4B48;
+  --text-500:#5A6B69;
+  --success:#0F766E;
+  --danger:#DC2626;
+  --focus:#0F766E;
+
+  /* turunan palet (kontras terverifikasi AA) */
+  --teal-800:#115E56;
+  --teal-300:#7FDED2;
+  --teal-50:#F2F8F7;
+  --amber-600:#D97706;      /* border/ikon amber di kanvas terang (>=3:1) */
+  --amber-700:#B45309;
+  --amber-ink:#92610A;      /* teks amber gelap di atas --amber-tint (4.8:1) */
+  --amber-tint:#FDF1DC;
+  --danger-ink:#B91C1C;     /* teks merah di kanvas terang (6.2:1) */
+  --danger-tint:#FDECEC;
+
+  /* panggung gelap */
+  --stage-bg:#0E241F;
+  --stage-fg:#EAF6F3;
+  --stage-hairline:rgba(255,255,255,0.10);
+  --stage-muted:#9FC8C0;    /* teks sekunder di panggung (8.9:1) */
+
+  /* -- tipografi -------------------------------------------------- */
+  --fs-display:2.5rem; --lh-display:1.1;
+  --fs-h1:2rem;        --lh-h1:1.15;
+  --fs-h2:1.5rem;      --lh-h2:1.2;
+  --fs-h3:1.25rem;     --lh-h3:1.3;
+  --fs-body-lg:1.125rem; --lh-body-lg:1.6;
+  --fs-body:1rem;      --lh-body:1.5;
+  --fs-small:.875rem;  --lh-small:1.5;
+  --fs-label:.75rem;   --lh-label:1.4;
+  --fs-caption:1.25rem; /* takarir live: minimum aksesibilitas 20px */
+
+  /* -- spasi (basis 8 + langkah 4) -------------------------------- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+
+  /* -- radius ------------------------------------------------------ */
+  --r-sm:6px; --r-md:10px; --r-lg:16px; --r-full:9999px;
+
+  /* -- elevasi (border dulu, bayangan tipis saat hover) ------------ */
+  --shadow-hover:0 1px 2px rgba(19,48,41,.06), 0 2px 8px rgba(19,48,41,.05);
+  --shadow-overlay:0 4px 12px rgba(19,48,41,.10), 0 12px 32px rgba(19,48,41,.12);
+
+  /* -- gerak (Material 3) ------------------------------------------ */
+  --dur-1:100ms; --dur-2:150ms; --dur-3:200ms; --dur-4:300ms; --dur-5:400ms;
+  --ease-standard:cubic-bezier(0.2,0,0,1);
+  --ease-decelerate:cubic-bezier(0.05,0.7,0.1,1);
+  --ease-accelerate:cubic-bezier(0.3,0,0.8,0.15);
+
+  /* skeleton */
+  --skel-a:#EFF3F2; --skel-b:#E3EAE8;
+}
+
+*,*::before,*::after{ box-sizing:border-box; margin:0; }
+
+html{ color-scheme:light; }
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:var(--fs-body); line-height:var(--lh-body);
+  background:var(--cream-50); color:var(--text-900);
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--teal-100); color:var(--dark-900); }
+
+img,svg,video{ display:block; max-width:100%; }
+button,input{ font:inherit; color:inherit; }
+
+/* Ikon Lucide: goresan presisi 1.75 di mana pun. */
+.lucide{ width:20px; height:20px; stroke-width:1.75px; flex:none; }
+
+/* -- fokus: selalu terlihat, jangan pernah dihapus tanpa pengganti -- */
+:focus{ outline:2px solid var(--focus); outline-offset:2px; }
+:focus:not(:focus-visible){ outline:none; }
+:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+/* radio tersembunyi tapi tetap bisa difokus keyboard */
+.sr-radio{
+  position:absolute; width:1px; height:1px; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); border:0; padding:0;
+}
+
+.skip-link{
+  position:absolute; left:var(--sp-4); top:-48px;
+  background:var(--surface); color:var(--teal-700);
+  border:1px solid var(--teal-700); border-radius:var(--r-sm);
+  padding:var(--sp-2) var(--sp-4); font-weight:500; text-decoration:none; z-index:60;
+}
+.skip-link:focus{ top:var(--sp-4); }
+
+/* =====================================================================
+   HEADER
+   ===================================================================== */
+.site{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);
+  padding:var(--sp-4) var(--sp-6);
+  border-bottom:1px solid var(--hairline);
+  background:var(--cream-50);
+}
+.brand{ display:flex; align-items:center; gap:var(--sp-3); min-width:0; }
+.brand .mark{ width:34px; height:34px; flex:none; }
+.brand-name{ font-size:1.125rem; font-weight:600; letter-spacing:-.01em; color:var(--text-900); }
+.brand-tag{
+  font-size:var(--fs-label); line-height:var(--lh-label); font-weight:500;
+  text-transform:uppercase; letter-spacing:.04em; color:var(--text-500);
+  border-left:1px solid var(--hairline); padding-left:var(--sp-3);
+}
+.head-actions{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; justify-content:flex-end; }
+
+/* -- pil status global: ikon + teks + warna, tidak pernah warna saja -- */
+.pill{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  padding:6px 14px; border-radius:var(--r-full);
+  font-size:var(--fs-small); font-weight:500;
+  border:1px solid var(--hairline); background:var(--surface); color:var(--text-600);
+  white-space:nowrap;
+}
+.pill .lucide{ width:15px; height:15px; }
+.pill-ic{ display:none; line-height:0; }
+.pill[data-state="idle"]      .ic-idle,
+.pill[data-state="listening"] .ic-listening,
+.pill[data-state="detecting"] .ic-listening,
+.pill[data-state="thinking"]  .ic-thinking,
+.pill[data-state="signing"]   .ic-signing,
+.pill[data-state="error"]     .ic-error{ display:inline-flex; }
+
+.pill[data-state="idle"]{ background:var(--teal-50); border-color:var(--hairline); color:var(--teal-700); }
+.pill[data-state="listening"],
+.pill[data-state="detecting"]{ background:var(--amber-tint); border-color:var(--amber-600); color:var(--amber-ink); }
+.pill[data-state="thinking"]{ background:var(--teal-100); border-color:var(--teal-700); color:var(--teal-700); }
+.pill[data-state="signing"]{ background:var(--teal-700); border-color:var(--teal-800); color:#fff; }
+.pill[data-state="error"]{ background:var(--danger-tint); border-color:var(--danger); color:var(--danger-ink); }
+
+/* =====================================================================
+   TOMBOL & INPUT
+   ===================================================================== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2);
+  border:1px solid var(--teal-800); border-radius:var(--r-sm);
+  background:var(--teal-700); color:#fff;
+  padding:10px 18px; font-weight:500; font-size:var(--fs-small); line-height:1.2;
+  cursor:pointer;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard);
+}
+.btn:hover{ background:var(--teal-800); }
+.btn:disabled{ opacity:.45; cursor:not-allowed; }
+.btn .lucide{ width:18px; height:18px; }
+
+.btn-ghost{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2);
+  border:1px solid var(--hairline); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text-600);
+  padding:10px 16px; font-weight:500; font-size:var(--fs-small); line-height:1.2;
+  cursor:pointer;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard);
+}
+.btn-ghost:hover{ background:var(--teal-50); border-color:var(--teal-700); color:var(--teal-700); }
+.btn-ghost .lucide{ width:16px; height:16px; }
+.btn-sm{ padding:7px 12px; font-size:.8125rem; }
+.btn-ghost[aria-pressed="true"]{
+  background:var(--teal-100); border-color:var(--teal-700); color:var(--teal-700);
+}
+
+/* tombol di atas panggung gelap */
+.btn-stage{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  border:1px solid var(--stage-hairline); border-radius:var(--r-sm);
+  background:transparent; color:var(--stage-fg);
+  padding:9px 14px; font-weight:500; font-size:var(--fs-small); cursor:pointer;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard);
+}
+.btn-stage:hover{ background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.25); }
+.btn-stage .lucide{ width:16px; height:16px; }
+.btn-stage.is-active{
+  background:var(--amber-500); border-color:var(--amber-500); color:var(--dark-900);
+}
+.btn-stage.is-primary{ background:var(--teal-700); border-color:var(--teal-700); color:#fff; }
+.btn-stage.is-primary:hover{ background:var(--teal-800); }
+
+.input{
+  flex:1; min-width:0;
+  padding:11px 14px 11px 42px;
+  border:1px solid var(--hairline); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text-900); font-size:var(--fs-body);
+  transition:border-color var(--dur-2) var(--ease-standard);
+}
+.input::placeholder{ color:var(--text-500); }
+.input:hover{ border-color:#CFD6D4; }
+.input:focus-visible{ border-color:var(--teal-700); outline-offset:0; }
+
+/* =====================================================================
+   KERANGKA HALAMAN
+   ===================================================================== */
+main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-7); }
+
+.intro{ margin-bottom:var(--sp-5); }
+.intro h1{ font-size:var(--fs-h1); line-height:var(--lh-h1); font-weight:600; letter-spacing:-.02em; }
+.intro p{ margin-top:var(--sp-2); color:var(--text-500); font-size:var(--fs-body); max-width:56ch; }
+
+/* -- tab dua fitur -------------------------------------------------- */
+.tabs{
+  display:inline-flex; gap:var(--sp-1); padding:var(--sp-1);
+  border:1px solid var(--hairline); border-radius:var(--r-full);
+  background:#F1F4F3; margin-bottom:var(--sp-5);
+}
+.tab{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  border:1px solid transparent; border-radius:var(--r-full);
+  background:transparent; color:var(--text-500);
+  padding:9px 18px; font-weight:500; font-size:var(--fs-small); cursor:pointer;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard);
+}
+.tab .lucide{ width:17px; height:17px; }
+.tab:hover{ color:var(--text-900); }
+.tab[aria-selected="true"]{
+  background:var(--surface); border-color:var(--hairline);
+  color:var(--teal-700); box-shadow:var(--shadow-hover);
+}
+.tab-sub{ font-weight:400; color:var(--text-500); display:none; }
+@media(min-width:720px){ .tab-sub{ display:inline; } }
+
+.duo{ display:grid; grid-template-columns:1.55fr 1fr; gap:var(--sp-5); align-items:start; }
+@media(max-width:960px){ .duo{ grid-template-columns:1fr; } }
+
+.stack{ display:flex; flex-direction:column; gap:var(--sp-4); }
+
+/* =====================================================================
+   KARTU
+   ===================================================================== */
+.card{
+  background:var(--surface);
+  border:1px solid var(--hairline); border-radius:var(--r-md);
+  padding:var(--sp-5);
+  transition:box-shadow var(--dur-2) var(--ease-standard);
+}
+.card:hover{ box-shadow:var(--shadow-hover); }
+.card-label{
+  display:flex; align-items:center; gap:var(--sp-2);
+  font-size:var(--fs-label); line-height:var(--lh-label); font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--text-500);
+  margin-bottom:var(--sp-3);
+}
+.card-label .lucide{ width:15px; height:15px; color:var(--teal-700); }
+
+.caption-text{
+  font-size:var(--fs-caption); font-weight:500; line-height:1.5;
+  color:var(--text-900); min-height:60px; overflow-wrap:anywhere;
+}
+.caption-text.is-empty{ color:var(--text-500); font-weight:400; }
+
+/* -- chip gloss ------------------------------------------------------ */
+.chips{ display:flex; flex-wrap:wrap; gap:var(--sp-2); min-height:36px; }
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--hairline); background:#F3F6F5;
+  font-size:var(--fs-small); font-weight:500; color:var(--text-600);
+  text-transform:uppercase; letter-spacing:.02em;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard);
+}
+.chip em{
+  font-style:normal; font-size:.6875rem; font-weight:500; letter-spacing:.04em;
+  padding:1px 6px; border-radius:var(--r-full);
+  background:var(--amber-tint); color:var(--amber-ink); border:1px solid var(--amber-600);
+}
+.chip.eja{ background:var(--amber-tint); border-color:#F0DDBA; color:var(--amber-ink); }
+.chip.eja em{ background:var(--surface); }
+/* status aktif tetap ada tanpa animasi: bg + border + teks (gloss-chip-sequence) */
+.chip.active{
+  background:var(--teal-100); border:1.5px solid var(--teal-700); color:var(--teal-700);
+  padding:4.5px 11.5px; /* kompensasi border 1.5px agar tidak menggeser layout */
+}
+
+/* -- meter cakupan kamus -------------------------------------------- */
+.cov{ margin-top:var(--sp-4); }
+.cov-row{
+  display:flex; justify-content:space-between; align-items:baseline; gap:var(--sp-3);
+  font-size:var(--fs-small); color:var(--text-500);
+}
+.cov-row strong{ color:var(--text-900); font-weight:600; font-variant-numeric:tabular-nums; }
+.meter{
+  margin-top:var(--sp-2); height:6px; border-radius:var(--r-full);
+  background:#EDF1F0; border:1px solid var(--hairline); overflow:hidden;
+}
+.meter>span{
+  display:block; height:100%; width:0%;
+  background:var(--teal-700); border-radius:var(--r-full);
+}
+
+/* -- skeleton "processing-shimmer" (fallback statis tanpa animasi) --- */
+.skel{
+  display:inline-block; height:30px; border-radius:var(--r-sm);
+  background:var(--skel-a); border:1px solid var(--hairline);
+}
+.skel-1{ width:88px; } .skel-2{ width:64px; } .skel-3{ width:104px; }
+
+/* -- baris saran cepat ---------------------------------------------- */
+.try-row{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); margin-top:var(--sp-3); }
+.try-label{ font-size:var(--fs-label); font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--text-500); }
+.try{
+  border:1px solid var(--hairline); border-radius:var(--r-full);
+  background:var(--surface); color:var(--text-600);
+  padding:5px 12px; font-size:.8125rem; font-weight:500; cursor:pointer;
+  transition:border-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard),
+             background-color var(--dur-2) var(--ease-standard);
+}
+.try:hover{ border-color:var(--teal-700); color:var(--teal-700); background:var(--teal-50); }
+
+/* -- pemberitahuan --------------------------------------------------- */
+.alert{
+  display:flex; gap:var(--sp-3); align-items:flex-start;
+  border:1px solid var(--danger); border-radius:var(--r-md);
+  background:var(--danger-tint); color:var(--danger-ink);
+  padding:var(--sp-3) var(--sp-4); font-size:var(--fs-small);
+}
+.alert .lucide{ width:18px; height:18px; margin-top:1px; }
+.alert.info{ border-color:var(--amber-600); background:var(--amber-tint); color:var(--amber-ink); }
+.alert strong{ font-weight:600; }
+
+/* =====================================================================
+   PANGGUNG GELAP (hero)
+   ===================================================================== */
+.stage{
+  --focus:#7FDED2; /* cincin fokus versi terang di permukaan gelap */
+  background:var(--stage-bg);
+  border:1px solid #1E3A34; border-radius:var(--r-lg);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.stage-top{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-4);
+  border-bottom:1px solid var(--stage-hairline);
+}
+.stage-eyebrow{
+  display:flex; align-items:center; gap:var(--sp-2);
+  font-size:var(--fs-label); line-height:var(--lh-label); font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--stage-muted);
+}
+.stage-eyebrow .lucide{ width:15px; height:15px; color:var(--teal-300); }
+
+.stage-body{
+  position:relative; flex:1; min-height:440px;
+  display:flex; align-items:center; justify-content:center;
+  padding:var(--sp-5);
+}
+@media(max-width:960px){ .stage-body{ min-height:340px; } }
+
+.idle-hint{
+  position:absolute; left:50%; bottom:var(--sp-4); transform:translateX(-50%);
+  width:max-content; max-width:85%;
+  color:var(--stage-muted); font-size:var(--fs-small); text-align:center; line-height:1.6;
+}
+
+/* video isyarat: crossfade lewat opacity, kontrak playback tetap */
+#player{
+  position:absolute; inset:var(--sp-4);
+  width:calc(100% - var(--sp-4)*2); height:calc(100% - var(--sp-4)*2);
+  object-fit:contain; border-radius:var(--r-md);
+  opacity:0; pointer-events:none; z-index:2;
+  transition:opacity var(--dur-3) var(--ease-standard);
+}
+#player.on{ opacity:1; }
+
+/* teks gloss besar (fallback teks / ejaan) */
+.gloss-wrap{
+  position:absolute; inset:0; z-index:2;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:var(--sp-2); padding:var(--sp-5); text-align:center;
+  opacity:0; pointer-events:none;
+  transition:opacity var(--dur-3) var(--ease-standard);
+}
+.gloss-wrap.on{ opacity:1; }
+.gloss-big{
+  color:var(--stage-fg); font-size:clamp(var(--fs-display),6vw,3.75rem);
+  line-height:var(--lh-display); font-weight:600;
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.gloss-sub{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  color:var(--stage-muted); font-size:var(--fs-small); font-weight:500;
+}
+
+/* label "memperagakan" */
+.now{
+  position:absolute; bottom:var(--sp-4); left:50%; transform:translateX(-50%);
+  z-index:3; display:none; align-items:center; gap:var(--sp-2);
+  background:rgba(14,36,31,.72); border:1px solid var(--stage-hairline);
+  color:var(--stage-fg); font-size:var(--fs-label); font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase;
+  padding:7px 14px; border-radius:var(--r-full); white-space:nowrap; max-width:92%;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.now.on{ display:inline-flex; }
+.now .lucide{ width:14px; height:14px; color:var(--teal-300); }
+
+/* bar bawah panggung: kecepatan + ulangi */
+.stage-bar{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-4);
+  border-top:1px solid var(--stage-hairline); flex-wrap:wrap;
+}
+.speed{ display:flex; align-items:center; gap:var(--sp-3); border:0; padding:0; }
+.speed-lab{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  font-size:var(--fs-label); font-weight:500; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--stage-muted);
+}
+.speed-lab .lucide{ width:15px; height:15px; color:var(--teal-300); }
+.seg{
+  display:inline-flex; gap:2px; padding:2px;
+  border:1px solid var(--stage-hairline); border-radius:var(--r-full);
+}
+.seg label{
+  padding:5px 12px; border-radius:var(--r-full); cursor:pointer;
+  font-size:.8125rem; font-weight:500; color:var(--stage-muted);
+  font-variant-numeric:tabular-nums;
+  border:1px solid transparent;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard);
+}
+.seg label:hover{ color:var(--stage-fg); }
+.seg input:checked + label{
+  background:rgba(127,224,210,.14); border-color:var(--teal-300); color:var(--teal-300);
+}
+.seg input:focus-visible + label{ outline:2px solid var(--focus); outline-offset:2px; }
+
+/* =====================================================================
+   NOVA — maskot robot (komponen SVG terisolasi, siap diganti avatar 3D)
+   ===================================================================== */
+.nova-slot{
+  position:absolute; inset:0; z-index:1;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform var(--dur-3) var(--ease-standard),
+             opacity var(--dur-3) var(--ease-standard);
+}
+.nova{ width:min(42vh,270px); height:auto; overflow:visible; }
+
+/* saat klip/teks tampil, Nova menepi ke pojok kiri bawah (state-transition) */
+.stage.live .nova-slot{ transform:translate(-31%,31%) scale(.36); opacity:.95; }
+
+.nova .nv-ant{ stroke:var(--teal-300); stroke-width:2; stroke-linecap:round; }
+.nova .nv-ant-dot{ fill:var(--teal-300); transition:fill var(--dur-3) var(--ease-standard); }
+.nova .nv-pod{ fill:#17423A; stroke:#2E6058; stroke-width:1.5; }
+.nova .nv-head{ fill:#10312B; stroke:#3ED3C2; stroke-width:2; }
+.nova .nv-face{ fill:#0B1F1B; stroke:var(--stage-hairline); stroke-width:1; }
+.nova .nv-eye{
+  fill:#4BE0CF;
+  transform-box:fill-box; transform-origin:center;
+  transition:fill var(--dur-3) var(--ease-standard),
+             transform var(--dur-3) var(--ease-standard);
+}
+.nova .nv-mouth{ fill:none; stroke:#2FA79A; stroke-width:2; stroke-linecap:round;
+  transition:stroke var(--dur-3) var(--ease-standard); }
+.nova .nv-body{ fill:#10312B; stroke:#2E6058; stroke-width:1.5; }
+.nova .nv-hand circle{ fill:#17423A; stroke:#3ED3C2; stroke-width:2; }
+.nova .nv-hand{
+  transform-box:fill-box; transform-origin:center;
+  transition:transform var(--dur-3) var(--ease-standard);
+}
+
+/* state Nova — info state selalu dobel lewat pil status berikon + teks */
+.nova-slot[data-state="listening"] .nv-ant-dot{ fill:var(--amber-500); }
+.nova-slot[data-state="listening"] .nv-mouth{ stroke:var(--amber-500); }
+.nova-slot[data-state="thinking"] .nv-eye{ transform:scaleY(.45); }
+.nova-slot[data-state="signing"] .nv-hand-l{ transform:translateY(-26px); }
+.nova-slot[data-state="signing"] .nv-hand-r{ transform:translateY(-26px); }
+.nova-slot[data-state="signing"] .nv-eye{ transform:scaleY(.8); }
+
+/* =====================================================================
+   HEARME — kamera + landmark
+   ===================================================================== */
+#camVideo{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; transform:scaleX(-1); /* cermin seperti kamera depan */
+  opacity:0; transition:opacity var(--dur-3) var(--ease-standard);
+}
+.cam.cam-on #camVideo{ opacity:1; }
+
+.cam-off{
+  position:relative; z-index:1; text-align:center; color:var(--stage-muted);
+  display:flex; flex-direction:column; align-items:center; gap:var(--sp-3);
+  font-size:var(--fs-body);
+}
+.cam-off .lucide{ width:32px; height:32px; color:var(--teal-300); }
+.cam-off span{ font-size:var(--fs-small); color:var(--stage-muted); }
+.cam.cam-on .cam-off{ display:none; }
+
+.sim-tag{
+  position:absolute; top:var(--sp-3); right:var(--sp-3); z-index:3;
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(14,36,31,.72); border:1px solid var(--stage-hairline);
+  color:var(--stage-muted); font-size:var(--fs-label); font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase;
+  padding:5px 10px; border-radius:var(--r-full);
+}
+.sim-tag .lucide{ width:13px; height:13px; }
+
+/* kerangka tangan MediaPipe: 21 titik + 21 ruas */
+.hand-svg{
+  position:absolute; right:7%; bottom:6%; z-index:2;
+  width:min(44%,290px); height:auto; overflow:visible;
+  opacity:0; transition:opacity var(--dur-4) var(--ease-standard);
+  pointer-events:none;
+}
+.cam.detecting .hand-svg{ opacity:1; }
+.hand-svg .bone{ stroke:rgba(127,224,210,.6); stroke-width:.9; stroke-linecap:round; }
+.hand-svg .lm{
+  fill:#6FE3D3;
+  transform-box:fill-box; transform-origin:center;
+}
+.hand-svg .lm-wrist{ fill:var(--teal-300); }
+.hand-svg .fgr{ transform-box:fill-box; transform-origin:50% 92%; }
+
+/* kartu hasil deteksi */
+.detected{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--sp-3); }
+.det-gloss{
+  font-size:var(--fs-h2); line-height:var(--lh-h2); font-weight:600;
+  letter-spacing:.03em; text-transform:uppercase; min-height:1.2em;
+  overflow-wrap:anywhere;
+}
+.det-conf{ text-align:right; flex:none; }
+.det-conf strong{
+  display:block; font-size:var(--fs-h3); font-weight:600;
+  font-variant-numeric:tabular-nums; color:var(--teal-700);
+}
+.det-conf span{ font-size:var(--fs-label); letter-spacing:.04em; text-transform:uppercase; color:var(--text-500); font-weight:500; }
+.det-note{
+  display:flex; align-items:center; gap:var(--sp-2);
+  margin-top:var(--sp-3); font-size:var(--fs-small); color:var(--text-500);
+}
+.det-note .lucide{ width:15px; height:15px; color:var(--teal-700); }
+
+.row-btns{ display:flex; gap:var(--sp-2); flex-wrap:wrap; margin-top:var(--sp-4); }
+
+/* ikon ganda dalam tombol (mic/stop, kamera on/off, dst.) */
+.swap-b{ display:none; }
+.is-active .swap-a, .listening .swap-a{ display:none; }
+.is-active .swap-b, .listening .swap-b{ display:inline-flex; }
+
+/* =====================================================================
+   BLOK MIKROFON
+   ===================================================================== */
+.mic-card{ text-align:center; }
+.mic-wrap{ display:flex; flex-direction:column; align-items:center; gap:var(--sp-3); padding:var(--sp-2) 0; }
+#micBtn{
+  position:relative; width:88px; height:88px; border-radius:var(--r-full);
+  border:1.5px solid var(--teal-800);
+  background:var(--teal-700); color:#fff; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard);
+}
+#micBtn .lucide{ width:28px; height:28px; }
+#micBtn:hover{ background:var(--teal-800); }
+/* merekam: amber + ikon gelap + cincin statis (fallback tanpa animasi) */
+#micBtn.listening{
+  background:var(--amber-500); border-color:var(--amber-700); color:var(--dark-900);
+  box-shadow:0 0 0 6px rgba(245,158,11,.28);
+}
+#micBtn::before{ /* cincin mic-pulse-ring, dianimasikan hanya di lapisan gerak */
+  content:""; position:absolute; inset:-6px; border-radius:var(--r-full);
+  border:2px solid var(--amber-500); opacity:0; pointer-events:none;
+}
+#micBtn[aria-disabled="true"]{ opacity:.5; cursor:not-allowed; }
+.mic-hint{ font-size:var(--fs-small); color:var(--text-500); font-weight:500; }
+.mic-hint.listening{ color:var(--amber-ink); }
+
+.type-row{ display:flex; gap:var(--sp-2); position:relative; }
+.type-ic{
+  position:absolute; left:13px; top:50%; transform:translateY(-50%);
+  color:var(--text-500); line-height:0; pointer-events:none;
+}
+.type-ic .lucide{ width:18px; height:18px; }
+
+/* =====================================================================
+   FOOTER
+   ===================================================================== */
+footer{
+  border-top:1px solid var(--hairline);
+  padding:var(--sp-4) var(--sp-6);
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
+  flex-wrap:wrap; font-size:var(--fs-small); color:var(--text-500);
+  max-width:1200px; margin:0 auto;
+}
+.srv{ display:inline-flex; align-items:center; gap:var(--sp-2); font-variant-numeric:tabular-nums; }
+.srv-dot{ width:8px; height:8px; border-radius:var(--r-full); background:#C4CCCA; flex:none; }
+.srv.ok .srv-dot{ background:var(--success); }
+.srv.bad .srv-dot{ background:var(--danger); }
+.srv.ok{ color:var(--teal-700); }
+.srv.bad{ color:var(--danger-ink); }
+
+/* =====================================================================
+   LAPISAN GERAK — semua animasi hidup HANYA di sini.
+   Dasar di atas = fallback statis (prefers-reduced-motion: reduce),
+   dan tombol "kurangi animasi" (html[data-reduce-motion="1"]) ikut mematikan.
+   Tidak ada yang berkedip >3x/detik (WCAG 2.3.1).
+   ===================================================================== */
+@media (prefers-reduced-motion: no-preference){
+
+  /* 7) page-load-stagger — sekali saat muat, langkah 70ms */
+  html:not([data-reduce-motion="1"]) .rv{
+    animation:pg-in var(--dur-4) var(--ease-decelerate) both;
+    animation-delay:calc(var(--stg,0) * 70ms);
+  }
+
+  /* 2) caption-stream-in */
+  html:not([data-reduce-motion="1"]) .cap-in{ animation:cap-in var(--dur-4) var(--ease-decelerate); }
+  html:not([data-reduce-motion="1"]) .gloss-wrap.on .gloss-big{ animation:cap-in var(--dur-4) var(--ease-decelerate); }
+
+  /* 1) mic-pulse-ring */
+  html:not([data-reduce-motion="1"]) #micBtn.listening::before{ animation:mic-ring 1.4s ease-out infinite; }
+
+  /* 3) gloss-chip-sequence: transisi + angkat halus */
+  html:not([data-reduce-motion="1"]) .chip.active{ transform:translateY(-1px); }
+  html:not([data-reduce-motion="1"]) .chip{
+    transition:background-color var(--dur-2) var(--ease-standard),
+               border-color var(--dur-2) var(--ease-standard),
+               color var(--dur-2) var(--ease-standard),
+               transform var(--dur-2) var(--ease-standard);
+  }
+
+  /* 4) nova-idle: mengapung + kedip mata */
+  html:not([data-reduce-motion="1"]) .nova .nv-bob{ animation:nv-bob 3s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .nova .nv-eye{ animation:nv-blink 5.2s ease-in-out infinite; }
+
+  /* 8) state-transition Nova */
+  html:not([data-reduce-motion="1"]) .nova-slot[data-state="listening"] .nv-ant-dot{ animation:ant-pulse 1.4s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .nova-slot[data-state="thinking"] .nv-ant-dot{ animation:ant-pulse 1.6s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .nova-slot[data-state="thinking"] .nv-eye{ animation:nv-scan .9s ease-in-out infinite alternate; }
+  html:not([data-reduce-motion="1"]) .nova-slot[data-state="signing"] .nv-hand-l{ animation:nv-wave-l 1s ease-in-out infinite alternate; }
+  html:not([data-reduce-motion="1"]) .nova-slot[data-state="signing"] .nv-hand-r{ animation:nv-wave-r 1s ease-in-out infinite alternate; }
+
+  /* 5) landmark-pulse: hanya saat deteksi aktif */
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .lm{ animation:lm-pulse 1.2s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .lm:nth-of-type(3n){ animation-delay:.2s; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .lm:nth-of-type(3n+1){ animation-delay:.45s; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg{ animation:hand-drift 4.5s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .fgr{ animation:fgr-flex 1.6s ease-in-out infinite alternate; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .fgr:nth-of-type(2){ animation-delay:.2s; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .fgr:nth-of-type(3){ animation-delay:.35s; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .fgr:nth-of-type(4){ animation-delay:.5s; }
+  html:not([data-reduce-motion="1"]) .cam.detecting .hand-svg .fgr:nth-of-type(5){ animation-delay:.65s; }
+
+  /* 6) processing-shimmer */
+  html:not([data-reduce-motion="1"]) .skel{
+    background:linear-gradient(90deg,var(--skel-a) 25%,var(--skel-b) 37%,var(--skel-a) 63%);
+    background-size:400% 100%;
+    animation:shimmer 1.3s var(--ease-standard) infinite;
+  }
+
+  /* pemutar loader pada pil status "memproses" */
+  html:not([data-reduce-motion="1"]) .pill .ic-thinking .lucide{ animation:spin 1.1s linear infinite; }
+
+  /* meter bergerak halus */
+  html:not([data-reduce-motion="1"]) .meter>span{ transition:width var(--dur-4) var(--ease-decelerate); }
+}
+
+@keyframes pg-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+@keyframes cap-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+@keyframes mic-ring{ from{ transform:scale(1); opacity:.55; } to{ transform:scale(1.55); opacity:0; } }
+@keyframes nv-bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+@keyframes nv-blink{ 0%,94.5%,100%{ transform:scaleY(1); } 96.5%,97.5%{ transform:scaleY(.1); } }
+@keyframes nv-scan{ from{ transform:translateX(-3px) scaleY(.45); } to{ transform:translateX(3px) scaleY(.45); } }
+@keyframes nv-wave-l{ from{ transform:translateY(-26px) rotate(-7deg); } to{ transform:translateY(-31px) rotate(7deg); } }
+@keyframes nv-wave-r{ from{ transform:translateY(-31px) rotate(7deg); } to{ transform:translateY(-26px) rotate(-7deg); } }
+@keyframes ant-pulse{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.5; transform:scale(1.4); } }
+@keyframes lm-pulse{ 0%,100%{ transform:scale(1); opacity:.95; } 50%{ transform:scale(1.35); opacity:.55; } }
+@keyframes hand-drift{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 33%{ transform:translate(3px,-4px) rotate(1.2deg); } 66%{ transform:translate(-3px,3px) rotate(-1deg); } }
+@keyframes fgr-flex{ from{ transform:rotate(0deg); } to{ transform:rotate(2.4deg); } }
+@keyframes shimmer{ from{ background-position:200% 0; } to{ background-position:-200% 0; } }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* =====================================================================
+   RESPONSIF
+   ===================================================================== */
+@media(max-width:720px){
+  .site{ padding:var(--sp-3) var(--sp-4); }
+  main{ padding:var(--sp-5) var(--sp-4) var(--sp-6); }
+  footer{ padding:var(--sp-4); }
+  .brand-tag{ display:none; }
+  .tabs{ width:100%; }
+  .tab{ flex:1; justify-content:center; }
+  .stage-bar{ justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#konten">Lewati ke konten utama</a>
+
+<header class="site rv" style="--stg:0">
+  <div class="brand">
+    <!-- logo mark: Nova mini (varian terang) -->
+    <svg class="mark" viewBox="0 0 48 48" role="img" aria-label="Logo Signova">
+      <line x1="24" y1="5" x2="24" y2="10" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="24" cy="4" r="2.4" fill="#0F766E"/>
+      <rect x="8" y="10" width="32" height="26" rx="9" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+      <rect x="17" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+      <rect x="27" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+      <path d="M18 40 h12" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-name">Signova</span>
+    <span class="brand-tag">AI · BISINDO</span>
+  </div>
+  <div class="head-actions">
+    <button id="rmToggle" type="button" class="btn-ghost btn-sm" aria-pressed="false">
+      <i data-lucide="sparkles" aria-hidden="true"></i><span>Kurangi animasi</span>
+    </button>
+    <span id="statusPill" class="pill" data-state="idle" role="status">
+      <span class="pill-ic ic-idle"><i data-lucide="check" aria-hidden="true"></i></span>
+      <span class="pill-ic ic-listening"><i data-lucide="mic" aria-hidden="true"></i></span>
+      <span class="pill-ic ic-thinking"><i data-lucide="loader" aria-hidden="true"></i></span>
+      <span class="pill-ic ic-signing"><i data-lucide="hand" aria-hidden="true"></i></span>
+      <span class="pill-ic ic-error"><i data-lucide="info" aria-hidden="true"></i></span>
+      <span id="statusText">Siap</span>
+    </span>
+  </div>
+</header>
+
+<main id="konten">
+
+  <noscript>
+    <div class="alert info" style="margin-bottom:24px">
+      <strong>JavaScript nonaktif.</strong>&nbsp;Demo interaktif Signova membutuhkan JavaScript;
+      teks halaman tetap dapat dibaca.
+    </div>
+  </noscript>
+
+  <div class="intro rv" style="--stg:1">
+    <h1>Penerjemah dua arah BISINDO</h1>
+    <p>Suara menjadi isyarat, isyarat menjadi suara — agar layanan publik setara untuk Teman Tuli.</p>
+  </div>
+
+  <div class="tabs rv" style="--stg:2" role="tablist" aria-label="Fitur Signova">
+    <button class="tab" id="tab-interpreter" role="tab" aria-selected="true" aria-controls="panel-interpreter" type="button">
+      <i data-lucide="mic" aria-hidden="true"></i>
+      <span>Interpreter</span><span class="tab-sub">· suara → isyarat</span>
+    </button>
+    <button class="tab" id="tab-hearme" role="tab" aria-selected="false" aria-controls="panel-hearme" tabindex="-1" type="button">
+      <i data-lucide="hand" aria-hidden="true"></i>
+      <span>HearMe</span><span class="tab-sub">· isyarat → suara</span>
+    </button>
+  </div>
+
+  <!-- ================= PANEL 1 · INTERPRETER ================= -->
+  <section id="panel-interpreter" role="tabpanel" aria-labelledby="tab-interpreter">
+    <div class="duo">
+
+      <!-- Panggung isyarat (hero) -->
+      <section class="stage rv" style="--stg:3" id="signStage" aria-label="Panggung peragaan bahasa isyarat">
+        <div class="stage-top">
+          <span class="stage-eyebrow"><i data-lucide="hand" aria-hidden="true"></i>Avatar BISINDO</span>
+          <span class="stage-eyebrow">Nova</span>
+        </div>
+
+        <div class="stage-body">
+          <!-- Nova: komponen SVG terisolasi — tukar isi #novaSlot dengan avatar 3D kelak -->
+          <div class="nova-slot" id="novaSlot" data-state="idle">
+            <svg class="nova" viewBox="0 0 140 150" role="img" aria-label="Nova, robot penerjemah Signova">
+              <g class="nv-bob">
+                <line class="nv-ant" x1="70" y1="19" x2="70" y2="30"/>
+                <circle class="nv-ant-dot" cx="70" cy="14" r="4.5"/>
+                <rect class="nv-pod" x="18" y="52" width="8" height="20" rx="4"/>
+                <rect class="nv-pod" x="114" y="52" width="8" height="20" rx="4"/>
+                <rect class="nv-head" x="28" y="30" width="84" height="64" rx="20"/>
+                <rect class="nv-face" x="40" y="42" width="60" height="40" rx="12"/>
+                <rect class="nv-eye nv-eye-l" x="52" y="54" width="8" height="16" rx="4"/>
+                <rect class="nv-eye nv-eye-r" x="80" y="54" width="8" height="16" rx="4"/>
+                <path class="nv-mouth" d="M60 76 Q70 81 80 76"/>
+                <rect class="nv-body" x="48" y="98" width="44" height="26" rx="12"/>
+                <g class="nv-hand nv-hand-l"><circle cx="34" cy="116" r="9"/></g>
+                <g class="nv-hand nv-hand-r"><circle cx="106" cy="116" r="9"/></g>
+              </g>
+            </svg>
+          </div>
+
+          <video id="player" playsinline muted></video>
+
+          <div class="gloss-wrap" id="glossWrap" aria-hidden="true">
+            <div class="gloss-big" id="glossBig"></div>
+            <div class="gloss-sub" id="glossSub"></div>
+          </div>
+
+          <p class="idle-hint" id="idleHint">Tekan tombol mikrofon dan mulai bicara, atau ketik kalimat di panel kanan.<br>Urutan isyarat BISINDO diperagakan di sini.</p>
+
+          <span class="now" id="nowLabel"><i data-lucide="play" aria-hidden="true"></i><span id="nowText"></span></span>
+        </div>
+
+        <div class="stage-bar">
+          <fieldset class="speed">
+            <legend class="sr-only">Kecepatan peragaan avatar</legend>
+            <span class="speed-lab" aria-hidden="true"><i data-lucide="gauge"></i>Kecepatan</span>
+            <div class="seg">
+              <input class="sr-radio" type="radio" name="speed" id="sp75" value="0.75">
+              <label for="sp75">0,75×</label>
+              <input class="sr-radio" type="radio" name="speed" id="sp100" value="1" checked>
+              <label for="sp100">1×</label>
+              <input class="sr-radio" type="radio" name="speed" id="sp125" value="1.25">
+              <label for="sp125">1,25×</label>
+            </div>
+          </fieldset>
+          <button class="btn-stage" id="replayBtn" type="button" disabled>
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i><span>Ulangi</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Panel kontrol -->
+      <aside class="stack">
+
+        <div class="card mic-card rv" style="--stg:4">
+          <h3 class="card-label" style="justify-content:center"><i data-lucide="mic" aria-hidden="true"></i>Input Suara</h3>
+          <div class="mic-wrap">
+            <button id="micBtn" type="button" aria-pressed="false" aria-label="Mulai atau hentikan rekaman suara">
+              <i data-lucide="mic" class="swap-a" aria-hidden="true"></i>
+              <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
+            </button>
+            <small class="mic-hint" id="micHint">Ketuk untuk mulai merekam</small>
+          </div>
+          <div class="alert info" id="srAlert" hidden>
+            <i data-lucide="mic-off" aria-hidden="true"></i>
+            <div><strong>Browser ini tidak mendukung input suara.</strong> Gunakan Chrome, atau ketik pesan di bawah.</div>
+          </div>
+        </div>
+
+        <div class="card rv" style="--stg:5">
+          <h3 class="card-label"><i data-lucide="activity" aria-hidden="true"></i>Teks Ucapan · Live Caption</h3>
+          <div id="caption" class="caption-text is-empty" aria-live="polite">Ucapan Anda akan tampil di sini…</div>
+        </div>
+
+        <div class="card rv" style="--stg:6" id="glossCard">
+          <h3 class="card-label"><i data-lucide="hand" aria-hidden="true"></i>Urutan Gloss BISINDO</h3>
+          <div id="glossRow" class="chips"></div>
+          <p class="sr-only" id="procNote" role="status"></p>
+          <div class="cov">
+            <div class="cov-row"><span id="coverage">Cakupan kamus akan tampil setelah terjemahan.</span></div>
+            <div class="meter" aria-hidden="true"><span id="covBar"></span></div>
+          </div>
+        </div>
+
+        <div class="card rv" style="--stg:7">
+          <h3 class="card-label"><i data-lucide="keyboard" aria-hidden="true"></i>Ketik Pesan</h3>
+          <div class="type-row">
+            <span class="type-ic" aria-hidden="true"><i data-lucide="keyboard"></i></span>
+            <input id="typeInput" class="input" type="text" placeholder="Atau ketik pesan di sini…"
+                   aria-label="Ketik pesan untuk diterjemahkan">
+            <button class="btn" id="sendBtn" type="button">
+              <i data-lucide="send" aria-hidden="true"></i><span>Terjemahkan</span>
+            </button>
+          </div>
+          <div class="try-row">
+            <span class="try-label">Coba</span>
+            <button class="try" type="button" data-text="Selamat pagi, saya mau daftar periksa">"Selamat pagi, saya mau daftar periksa"</button>
+            <button class="try" type="button" data-text="Terima kasih, sampai jumpa">"Terima kasih, sampai jumpa"</button>
+          </div>
+          <div class="alert" id="netAlert" role="alert" hidden style="margin-top:16px">
+            <i data-lucide="wifi-off" aria-hidden="true"></i>
+            <div><strong>Tidak bisa menghubungi server.</strong> Pastikan uvicorn berjalan, lalu coba lagi.</div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= PANEL 2 · HEARME ================= -->
+  <section id="panel-hearme" role="tabpanel" aria-labelledby="tab-hearme" hidden>
+    <div class="duo">
+
+      <!-- Kamera deteksi -->
+      <section class="stage cam" id="camStage" aria-label="Kamera deteksi bahasa isyarat">
+        <div class="stage-top">
+          <span class="stage-eyebrow"><i data-lucide="camera" aria-hidden="true"></i>Kamera HearMe</span>
+          <span class="stage-eyebrow">21 titik tangan</span>
+        </div>
+
+        <div class="stage-body">
+          <video id="camVideo" playsinline muted></video>
+
+          <div class="cam-off" id="camOff">
+            <i data-lucide="camera-off" aria-hidden="true"></i>
+            <p>Kamera belum aktif.<br><span>Nyalakan kamera, lalu mulai deteksi isyarat.</span></p>
+          </div>
+
+          <!-- kerangka tangan MediaPipe (21 landmark, 21 ruas) -->
+          <svg class="hand-svg" viewBox="0 0 100 100" aria-hidden="true">
+            <!-- telapak (statis) -->
+            <line class="bone" x1="50" y1="88" x2="39" y2="81"/>
+            <line class="bone" x1="50" y1="88" x2="42" y2="61"/>
+            <line class="bone" x1="50" y1="88" x2="65" y2="65"/>
+            <line class="bone" x1="42" y1="61" x2="50" y2="59"/>
+            <line class="bone" x1="50" y1="59" x2="58" y2="61"/>
+            <line class="bone" x1="58" y1="61" x2="65" y2="65"/>
+            <circle class="lm lm-wrist" cx="50" cy="88" r="2.6"/>
+            <circle class="lm" cx="42" cy="61" r="1.9"/>
+            <circle class="lm" cx="50" cy="59" r="1.9"/>
+            <circle class="lm" cx="58" cy="61" r="1.9"/>
+            <circle class="lm" cx="65" cy="65" r="1.9"/>
+            <!-- ibu jari -->
+            <g class="fgr">
+              <line class="bone" x1="39" y1="81" x2="31" y2="73"/>
+              <line class="bone" x1="31" y1="73" x2="25" y2="65"/>
+              <line class="bone" x1="25" y1="65" x2="20" y2="58"/>
+              <circle class="lm" cx="39" cy="81" r="1.9"/>
+              <circle class="lm" cx="31" cy="73" r="1.9"/>
+              <circle class="lm" cx="25" cy="65" r="1.9"/>
+              <circle class="lm" cx="20" cy="58" r="1.9"/>
+            </g>
+            <!-- telunjuk -->
+            <g class="fgr">
+              <line class="bone" x1="42" y1="61" x2="40" y2="49"/>
+              <line class="bone" x1="40" y1="49" x2="39" y2="40"/>
+              <line class="bone" x1="39" y1="40" x2="38" y2="32"/>
+              <circle class="lm" cx="40" cy="49" r="1.9"/>
+              <circle class="lm" cx="39" cy="40" r="1.9"/>
+              <circle class="lm" cx="38" cy="32" r="1.9"/>
+            </g>
+            <!-- jari tengah -->
+            <g class="fgr">
+              <line class="bone" x1="50" y1="59" x2="50" y2="45"/>
+              <line class="bone" x1="50" y1="45" x2="50" y2="35"/>
+              <line class="bone" x1="50" y1="35" x2="50" y2="27"/>
+              <circle class="lm" cx="50" cy="45" r="1.9"/>
+              <circle class="lm" cx="50" cy="35" r="1.9"/>
+              <circle class="lm" cx="50" cy="27" r="1.9"/>
+            </g>
+            <!-- jari manis -->
+            <g class="fgr">
+              <line class="bone" x1="58" y1="61" x2="59" y2="48"/>
+              <line class="bone" x1="59" y1="48" x2="60" y2="39"/>
+              <line class="bone" x1="60" y1="39" x2="61" y2="32"/>
+              <circle class="lm" cx="59" cy="48" r="1.9"/>
+              <circle class="lm" cx="60" cy="39" r="1.9"/>
+              <circle class="lm" cx="61" cy="32" r="1.9"/>
+            </g>
+            <!-- kelingking -->
+            <g class="fgr">
+              <line class="bone" x1="65" y1="65" x2="68" y2="55"/>
+              <line class="bone" x1="68" y1="55" x2="70" y2="47"/>
+              <line class="bone" x1="70" y1="47" x2="71" y2="41"/>
+              <circle class="lm" cx="68" cy="55" r="1.9"/>
+              <circle class="lm" cx="70" cy="47" r="1.9"/>
+              <circle class="lm" cx="71" cy="41" r="1.9"/>
+            </g>
+          </svg>
+
+          <span class="sim-tag"><i data-lucide="info" aria-hidden="true"></i>Simulasi demo</span>
+        </div>
+
+        <div class="stage-bar">
+          <button class="btn-stage" id="camBtn" type="button">
+            <i data-lucide="camera" class="swap-a" aria-hidden="true"></i>
+            <i data-lucide="camera-off" class="swap-b" aria-hidden="true"></i>
+            <span id="camBtnText">Nyalakan Kamera</span>
+          </button>
+          <button class="btn-stage is-primary" id="detectBtn" type="button">
+            <i data-lucide="hand" class="swap-a" aria-hidden="true"></i>
+            <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
+            <span id="detectBtnText">Mulai Deteksi</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Hasil deteksi -->
+      <aside class="stack">
+
+        <div class="card">
+          <h3 class="card-label"><i data-lucide="hand" aria-hidden="true"></i>Isyarat Terdeteksi</h3>
+          <div class="detected" aria-live="polite" aria-atomic="true">
+            <div class="det-gloss" id="detGloss">—</div>
+            <div class="det-conf">
+              <strong id="detPct">0%</strong>
+              <span>keyakinan</span>
+            </div>
+          </div>
+          <div class="meter" aria-hidden="true" style="margin-top:12px"><span id="confBar"></span></div>
+          <p class="det-note" id="detNote"><i data-lucide="info" aria-hidden="true"></i><span>Nyalakan kamera untuk mulai. Pengenalan isyarat versi pratinjau (disimulasikan).</span></p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-label"><i data-lucide="volume-2" aria-hidden="true"></i>Hasil Terjemahan</h3>
+          <div id="hmChips" class="chips" style="margin-bottom:12px"></div>
+          <p id="hmText" class="caption-text is-empty" aria-live="polite">Kalimat hasil terjemahan akan tampil di sini…</p>
+          <div class="row-btns">
+            <button class="btn" id="speakBtn" type="button" disabled>
+              <i data-lucide="volume-2" class="swap-a" aria-hidden="true"></i>
+              <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
+              <span id="speakBtnText">Putar Suara</span>
+            </button>
+            <button class="btn-ghost" id="hmClear" type="button">
+              <i data-lucide="trash-2" aria-hidden="true"></i><span>Hapus</span>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Signova AI — demo BizClash 3.0 · penerjemah dua arah BISINDO</span>
+  <span class="srv" id="srvStatus"><span class="srv-dot" aria-hidden="true"></span><span id="srvText">Memeriksa server…</span></span>
+</footer>
+
+<script>
+'use strict';
+const API = '';                 // sama-origin (diserve FastAPI)
+const $ = id => document.getElementById(id);
+const GLOSS_MS = 1400;          // durasi tampil per gloss saat klip tidak ada
+
+/* ---------- Ikon Lucide (goresan 1.75, dipanggil ulang bila konten berubah) ---------- */
+function initIcons(){
+  if (!window.lucide) return;
+  try { lucide.createIcons({ attrs: { 'stroke-width': 1.75 } }); }
+  catch (e) { try { lucide.createIcons(); } catch (_) {} }
+}
+document.addEventListener('DOMContentLoaded', initIcons);
+window.addEventListener('load', initIcons);
+
+/* ---------- Tombol "kurangi animasi" (persisten) ---------- */
+(function(){
+  const btn = $('rmToggle');
+  const sync = () => btn.setAttribute('aria-pressed',
+    document.documentElement.getAttribute('data-reduce-motion') === '1' ? 'true' : 'false');
+  sync();
+  btn.addEventListener('click', () => {
+    const on = document.documentElement.getAttribute('data-reduce-motion') === '1';
+    document.documentElement.setAttribute('data-reduce-motion', on ? '' : '1');
+    try { localStorage.setItem('signova-rm', on ? '0' : '1'); } catch (e) {}
+    sync();
+  });
+})();
+
+/* ---------- Mesin status global: Nova + pil (ikon + teks + warna serentak) ---------- */
+const STATE_TEXT = {
+  idle: 'Siap', listening: 'Mendengarkan…', thinking: 'Memproses…',
+  signing: 'Menerjemahkan', detecting: 'Mendeteksi…', error: 'Gangguan',
+};
+function setState(state, text){
+  $('statusPill').setAttribute('data-state', state);
+  $('statusText').textContent = text || STATE_TEXT[state] || state;
+  // Nova hanya memahami 4 state dirinya; state lain dipetakan ke idle/listening
+  const novaMap = { idle:'idle', listening:'listening', thinking:'thinking', signing:'signing', detecting:'listening', error:'idle' };
+  $('novaSlot').setAttribute('data-state', novaMap[state] || 'idle');
+}
+
+/* ---------- Tab dua fitur (pola WAI-ARIA tabs) ---------- */
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+function selectTab(tab){
+  tabs.forEach(t => {
+    const sel = t === tab;
+    t.setAttribute('aria-selected', String(sel));
+    t.tabIndex = sel ? 0 : -1;
+    document.getElementById(t.getAttribute('aria-controls')).hidden = !sel;
+  });
+  if (tab.id !== 'tab-hearme') stopDetect(true);   // tinggalkan HearMe -> hentikan simulasi deteksi
+}
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => selectTab(tab));
+  tab.addEventListener('keydown', e => {
+    const i = tabs.indexOf(tab);
+    let target = null;
+    if (e.key === 'ArrowRight') target = tabs[(i + 1) % tabs.length];
+    if (e.key === 'ArrowLeft')  target = tabs[(i - 1 + tabs.length) % tabs.length];
+    if (e.key === 'Home') target = tabs[0];
+    if (e.key === 'End')  target = tabs[tabs.length - 1];
+    if (target) { e.preventDefault(); target.focus(); selectTab(target); }
+  });
+});
+
+/* =====================================================================
+   INTERPRETER — ucapan/teks -> urutan isyarat
+   Kontrak backend TIDAK berubah:
+   POST /translate {text} -> {input, tokens, gloss, clips[], coverage}
+   clip.mode: "video" | "eja" | "teks"
+   ===================================================================== */
+
+/* ---------- Speech recognition (Web Speech API, id-ID) ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+
+if (SR) {
+  rec = new SR();
+  rec.lang = 'id-ID';
+  rec.interimResults = true;
+  rec.continuous = false;
+
+  rec.onresult = e => {
+    let final = '', interim = '';
+    for (const r of e.results) (r.isFinal ? final += r[0].transcript : interim += r[0].transcript);
+    setCaption('"' + (final || interim).trim() + '"', !!final.trim());
+    if (final.trim()) translate(final.trim());
+  };
+  rec.onend = () => setListening(false);
+  rec.onerror = ev => { setListening(false); setState('error', 'Gangguan mic: ' + ev.error); };
+} else {
+  $('srAlert').hidden = false;
+  $('micBtn').setAttribute('aria-disabled', 'true');
+  $('micHint').textContent = 'Input suara tidak tersedia — gunakan ketik';
+}
+
+function setListening(on){
+  const wasListening = listening;
+  listening = on;
+  $('micBtn').classList.toggle('listening', on);
+  $('micBtn').setAttribute('aria-pressed', String(on));
+  $('micHint').classList.toggle('listening', on);
+  $('micHint').textContent = on ? 'Mendengarkan… ketuk untuk berhenti'
+                                : (rec ? 'Ketuk untuk mulai merekam' : 'Input suara tidak tersedia — gunakan ketik');
+  if (on) setState('listening');
+  // jangan menimpa status "memproses/menerjemahkan" ketika mic berhenti otomatis
+  else if (wasListening && $('statusPill').getAttribute('data-state') === 'listening') setState('idle');
+}
+
+$('micBtn').addEventListener('click', () => {
+  if (!rec) { $('srAlert').hidden = false; $('typeInput').focus(); return; }
+  if (listening) { rec.stop(); return; }
+  try { rec.start(); setListening(true); }
+  catch (e) { /* start() ganda -> abaikan */ }
+});
+
+/* ---------- Caption (>=20px; animasi cap-in hanya untuk teks final) ---------- */
+function setCaption(text, animate){
+  const c = $('caption');
+  c.textContent = text;
+  c.classList.remove('is-empty');
+  if (animate) { c.classList.remove('cap-in'); void c.offsetWidth; c.classList.add('cap-in'); }
+}
+
+/* ---------- Input ketik (fallback andal untuk demo) ---------- */
+$('sendBtn').addEventListener('click', () => {
+  const t = $('typeInput').value.trim();
+  if (!t) return;
+  setCaption('"' + t + '"', true);
+  translate(t);
+});
+$('typeInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('sendBtn').click(); });
+document.querySelectorAll('.try').forEach(b => b.addEventListener('click', () => {
+  $('typeInput').value = b.dataset.text;
+  $('sendBtn').click();
+}));
+
+/* ---------- Kecepatan avatar ---------- */
+function speedVal(){
+  const r = document.querySelector('input[name="speed"]:checked');
+  return r ? parseFloat(r.value) : 1;
+}
+
+/* ---------- Panggil backend ---------- */
+let lastClips = null;
+
+async function translate(text){
+  seqId++;                                   // batalkan urutan yang sedang berjalan
+  setState('thinking');
+  showSkeleton(true);
+  $('netAlert').hidden = true;
+  try {
+    const res = await fetch(API + '/translate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    showSkeleton(false);
+    renderGloss(data);
+    lastClips = data.clips;
+    $('replayBtn').disabled = !data.clips.length;
+    await playSequence(data.clips);
+  } catch (err) {
+    showSkeleton(false);
+    setState('error', 'Gagal terhubung');
+    $('netAlert').hidden = false;
+  }
+}
+
+$('replayBtn').addEventListener('click', () => { if (lastClips) playSequence(lastClips); });
+
+/* ---------- Skeleton "memproses" (aria-busy + sr-only status) ---------- */
+function showSkeleton(on){
+  const card = $('glossCard');
+  card.setAttribute('aria-busy', String(on));
+  $('procNote').textContent = on ? 'Memproses terjemahan…' : '';
+  if (on) {
+    $('glossRow').innerHTML =
+      '<span class="skel skel-1"></span><span class="skel skel-2"></span><span class="skel skel-3"></span>';
+  }
+}
+
+/* ---------- Render chip gloss + cakupan kamus ---------- */
+function renderGloss(data){
+  const row = $('glossRow'); row.innerHTML = '';
+  data.clips.forEach((c, i) => {
+    const s = document.createElement('span');
+    s.className = 'chip' + (c.mode === 'eja' ? ' eja' : '');
+    s.id = 'chip-' + i;
+    s.textContent = c.gloss;
+    if (c.mode === 'eja') {
+      const em = document.createElement('em');
+      em.textContent = 'eja';
+      s.appendChild(em);
+    }
+    row.appendChild(s);
+  });
+  const total = data.clips.length;
+  const nVideo = data.clips.filter(c => c.mode === 'video').length;
+  const pct = Math.round(data.coverage * 100);
+  $('coverage').innerHTML = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'Cakupan kamus ' + pct + '%';
+  $('coverage').appendChild(strong);
+  $('coverage').appendChild(document.createTextNode(
+    ' · ' + nVideo + ' dari ' + total + ' gloss punya klip'));
+  $('covBar').style.width = pct + '%';
+}
+
+/* ---------- Pemutar urutan isyarat (video -> eja -> teks) ---------- */
+const player = $('player');
+const stage = $('signStage');
+let seqId = 0;
+
+function nowShow(text){
+  $('nowText').textContent = text;
+  $('nowLabel').classList.add('on');
+}
+function nowHide(){ $('nowLabel').classList.remove('on'); }
+
+async function playSequence(clips){
+  const my = ++seqId;
+  setState('signing');
+  $('idleHint').hidden = true;
+  stage.classList.add('live');
+
+  for (let i = 0; i < clips.length; i++) {
+    if (my !== seqId) return;
+    document.querySelectorAll('#glossRow .chip').forEach(c => c.classList.remove('active'));
+    const chip = $('chip-' + i); if (chip) chip.classList.add('active');
+    const c = clips[i];
+    nowShow('Memperagakan · ' + c.gloss.toUpperCase());
+
+    if (c.mode === 'video' && await playClip('/videos/' + c.file)) continue;
+    if (my !== seqId) return;
+
+    if (c.mode === 'eja') {                    // fingerspelling huruf per huruf
+      for (const l of c.letters) {
+        if (my !== seqId) return;
+        if (l.file && await playClip('/videos/' + l.file, 700)) continue;
+        if (my !== seqId) return;
+        await showGloss(l.letter, 'ejaan huruf', 700);
+      }
+      continue;
+    }
+    // fallback terakhir: tampilkan gloss sebagai teks besar
+    await showGloss(c.gloss, c.mode === 'teks' ? 'ditampilkan sebagai teks' : 'klip belum tersedia — placeholder');
+  }
+
+  if (my !== seqId) return;
+  document.querySelectorAll('#glossRow .chip').forEach(c => c.classList.remove('active'));
+  nowHide(); hideGloss();
+  stage.classList.remove('live');
+  setState('idle');
+}
+
+function playClip(src, timeoutMs){
+  return new Promise(resolve => {
+    hideGloss();
+    player.classList.add('on');
+    player.src = src;
+    player.defaultPlaybackRate = speedVal();  /* muat media baru me-reset playbackRate */
+    player.playbackRate = speedVal();
+    let done = false;
+    const finish = ok => { if (!done) { done = true; player.classList.remove('on'); resolve(ok); } };
+    player.onended = () => finish(true);
+    player.onerror = () => finish(false);        // klip 404 -> fallback teks
+    player.play().catch(() => finish(false));
+    if (timeoutMs) setTimeout(() => finish(true), timeoutMs + 4000);
+  });
+}
+
+function showGloss(text, sub, ms = GLOSS_MS){
+  return new Promise(r => {
+    player.classList.remove('on');
+    $('glossBig').textContent = text;
+    $('glossSub').textContent = sub;
+    const w = $('glossWrap');
+    w.classList.remove('on'); void w.offsetWidth;   // retrigger animasi masuk
+    w.classList.add('on');
+    w.setAttribute('aria-hidden', 'false');
+    setTimeout(() => { hideGloss(); r(); }, ms / speedVal());
+  });
+}
+function hideGloss(){
+  $('glossWrap').classList.remove('on');
+  $('glossWrap').setAttribute('aria-hidden', 'true');
+}
+
+/* =====================================================================
+   HEARME — isyarat -> suara.
+   Kamera nyata (getUserMedia); pengenalan isyarat DISIMULASIKAN untuk
+   demo (belum ada endpoint model di backend) dan diberi label jujur
+   "Simulasi demo". Keluaran suara memakai Web Speech Synthesis (id-ID).
+   ===================================================================== */
+const camStage = $('camStage');
+const camVideo = $('camVideo');
+let camStream = null;
+let detecting = false, detectTimer = null, phraseIdx = 0;
+
+const DEMO_PHRASES = [
+  { glosses: ['halo', 'saya', 'mau', 'daftar', 'periksa'], sentence: 'Halo, saya mau daftar periksa.' },
+  { glosses: ['saya', 'sakit', 'tolong', 'bantu'],          sentence: 'Saya sakit, tolong bantu.' },
+  { glosses: ['saya', 'mau', 'bayar', 'berapa'],            sentence: 'Saya mau bayar, berapa?' },
+];
+
+function detNote(text){ $('detNote').querySelector('span').textContent = text; }
+
+$('camBtn').addEventListener('click', async () => {
+  if (camStream) {
+    stopDetect(true);
+    camStream.getTracks().forEach(t => t.stop());
+    camStream = null;
+    camVideo.srcObject = null;
+    camStage.classList.remove('cam-on');
+    $('camBtn').classList.remove('is-active');
+    $('camBtnText').textContent = 'Nyalakan Kamera';
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    detNote('Browser ini tidak mendukung akses kamera. Deteksi tetap bisa disimulasikan.');
+    return;
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 } }, audio: false
+    });
+    camVideo.srcObject = camStream;
+    await camVideo.play();
+    camStage.classList.add('cam-on');
+    $('camBtn').classList.add('is-active');
+    $('camBtnText').textContent = 'Matikan Kamera';
+    detNote('Kamera aktif. Tekan "Mulai Deteksi" untuk membaca isyarat.');
+  } catch (e) {
+    detNote('Izin kamera ditolak. Deteksi tetap bisa disimulasikan tanpa kamera.');
+  }
+});
+
+$('detectBtn').addEventListener('click', () => detecting ? stopDetect(false) : startDetect());
+
+function startDetect(){
+  detecting = true;
+  camStage.classList.add('detecting');
+  $('detectBtn').classList.add('is-active');
+  $('detectBtn').classList.remove('is-primary');
+  $('detectBtnText').textContent = 'Berhenti';
+  $('hmChips').innerHTML = '';
+  $('hmText').textContent = 'Membaca gerakan tangan…';
+  $('hmText').classList.add('is-empty');
+  $('speakBtn').disabled = true;
+  setState('detecting');
+  detNote('Mendeteksi gerakan tangan…');
+
+  const phrase = DEMO_PHRASES[phraseIdx % DEMO_PHRASES.length];
+  const confs = phrase.glosses.map(() => 88 + Math.round(Math.random() * 9));
+  let i = 0;
+
+  const step = () => {
+    if (!detecting) return;
+    const gloss = phrase.glosses[i], conf = confs[i];
+    const g = $('detGloss');
+    g.textContent = gloss;
+    g.classList.remove('cap-in'); void g.offsetWidth; g.classList.add('cap-in');
+    $('detPct').textContent = conf + '%';
+    $('confBar').style.width = conf + '%';
+
+    const chip = document.createElement('span');
+    chip.className = 'chip active';
+    chip.textContent = gloss;
+    document.querySelectorAll('#hmChips .chip').forEach(c => c.classList.remove('active'));
+    $('hmChips').appendChild(chip);
+
+    i++;
+    if (i < phrase.glosses.length) { detectTimer = setTimeout(step, 1700); }
+    else { detectTimer = setTimeout(() => finishDetect(phrase), 1200); }
+  };
+  detectTimer = setTimeout(step, 900);
+}
+
+function finishDetect(phrase){
+  phraseIdx++;
+  stopDetect(true);
+  const t = $('hmText');
+  t.textContent = phrase.sentence;
+  t.classList.remove('is-empty');
+  t.classList.remove('cap-in'); void t.offsetWidth; t.classList.add('cap-in');
+  $('speakBtn').disabled = false;
+  document.querySelectorAll('#hmChips .chip').forEach(c => c.classList.remove('active'));
+  detNote('Deteksi selesai — tekan "Putar Suara" untuk membacakan.');
+}
+
+function stopDetect(silent){
+  if (detectTimer) { clearTimeout(detectTimer); detectTimer = null; }
+  if (!detecting) return;
+  detecting = false;
+  camStage.classList.remove('detecting');
+  $('detectBtn').classList.remove('is-active');
+  $('detectBtn').classList.add('is-primary');
+  $('detectBtnText').textContent = 'Mulai Deteksi';
+  if ($('statusPill').getAttribute('data-state') === 'detecting') setState('idle');
+  if (!silent) detNote('Deteksi dihentikan.');
+}
+
+/* ---------- Keluaran suara (Web Speech Synthesis, id-ID) ---------- */
+let speaking = false;
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();   // pemanasan daftar suara
+} else {
+  $('speakBtn').disabled = true;
+  $('speakBtnText').textContent = 'Suara tidak didukung';
+}
+
+$('speakBtn').addEventListener('click', () => {
+  if (!('speechSynthesis' in window)) return;
+  if (speaking) { speechSynthesis.cancel(); resetSpeakBtn(); return; }
+  const text = $('hmText').textContent.trim();
+  if (!text || $('hmText').classList.contains('is-empty')) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'id-ID';
+  const v = speechSynthesis.getVoices().find(v => (v.lang || '').toLowerCase().startsWith('id'));
+  if (v) u.voice = v;
+  u.onend = resetSpeakBtn;
+  u.onerror = resetSpeakBtn;
+  speaking = true;
+  $('speakBtn').classList.add('is-active');
+  $('speakBtnText').textContent = 'Berhenti';
+  speechSynthesis.speak(u);
+});
+function resetSpeakBtn(){
+  speaking = false;
+  $('speakBtn').classList.remove('is-active');
+  $('speakBtnText').textContent = 'Putar Suara';
+}
+
+$('hmClear').addEventListener('click', () => {
+  stopDetect(true);
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  resetSpeakBtn();
+  $('hmChips').innerHTML = '';
+  $('hmText').textContent = 'Kalimat hasil terjemahan akan tampil di sini…';
+  $('hmText').classList.add('is-empty');
+  $('detGloss').textContent = '—';
+  $('detPct').textContent = '0%';
+  $('confBar').style.width = '0%';
+  $('speakBtn').disabled = true;
+  detNote('Hasil dihapus. Mulai deteksi untuk membaca isyarat baru.');
+});
+
+/* ---------- Cek server (GET /health, endpoint lama) ---------- */
+(async function(){
+  const el = $('srvStatus'), txt = $('srvText');
+  try {
+    const r = await fetch(API + '/health');
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    el.classList.add('ok');
+    txt.textContent = 'Server terhubung · kamus ' + (d.vocab_size || 0) + ' entri';
+  } catch (e) {
+    el.classList.add('bad');
+    txt.textContent = 'Server tidak terhubung';
+  }
+})();
+</script>
+</body>
+</html>
