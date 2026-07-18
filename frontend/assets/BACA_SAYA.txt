@@ -1,0 +1,12 @@
+Folder aset maskot/logo (opsional).
+
+Jika file PNG berikut ada di folder ini, frontend otomatis memakainya
+menggantikan SVG Nova bawaan (fallback) pada slot yang sama:
+
+  logo.png         - tanda logo di navbar/header (34x34 tampil)
+  nova-hero.png    - ilustrasi hero landing (~320x460)
+  nova-auth.png    - ilustrasi halaman Masuk/Daftar (~290 lebar)
+  nova-stage.png   - Nova di panggung Interpreter (~270 lebar)
+  nova-camera.png  - placeholder kamera HearMe (~64 lebar)
+
+Tanpa file-file ini, SVG geometris Nova tetap tampil — tidak ada yang rusak.

@@ -21,8 +21,10 @@ try{ if(localStorage.getItem('signova-rm')==='1'){ document.documentElement.setA
 <style>
 /* =====================================================================
    SIGNOVA AI — sistem desain "quiet dev-tool minimalism"
-   Border-first (hairline 1px), satu aksen teal, amber hanya untuk
-   status aktif/merekam. Semua gerak dibungkus prefers-reduced-motion.
+   SPA 6 tampilan (hash routing): #/ #/masuk #/daftar #/dashboard
+   #/interpreter #/hearme. Border-first (hairline 1px), satu aksen teal,
+   amber hanya untuk status aktif/merekam. Semua gerak dibungkus
+   prefers-reduced-motion.
    ===================================================================== */
 
 :root{
@@ -132,25 +134,21 @@ button,input{ font:inherit; color:inherit; }
 .skip-link:focus{ top:var(--sp-4); }
 
 /* =====================================================================
-   HEADER
+   KERANGKA SPA
    ===================================================================== */
-.site{
-  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);
-  padding:var(--sp-4) var(--sp-6);
-  border-bottom:1px solid var(--hairline);
-  background:var(--cream-50);
-}
-.brand{ display:flex; align-items:center; gap:var(--sp-3); min-width:0; }
-.brand .mark{ width:34px; height:34px; flex:none; }
-.brand-name{ font-size:1.125rem; font-weight:600; letter-spacing:-.01em; color:var(--text-900); }
-.brand-tag{
-  font-size:var(--fs-label); line-height:var(--lh-label); font-weight:500;
-  text-transform:uppercase; letter-spacing:.04em; color:var(--text-500);
-  border-left:1px solid var(--hairline); padding-left:var(--sp-3);
-}
-.head-actions{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; justify-content:flex-end; }
+main{ padding:0; }
+.wrap{ max-width:1200px; margin:0 auto; padding-left:var(--sp-6); padding-right:var(--sp-6); }
+.view[hidden]{ display:none; }
 
-/* -- pil status global: ikon + teks + warna, tidak pernah warna saja -- */
+/* slot aset yang bisa ditukar: SVG bawaan -> PNG di assets/ bila ada */
+.art svg, .art-img{ width:100%; height:auto; display:block; }
+
+.brand{ display:inline-flex; align-items:center; gap:var(--sp-3); text-decoration:none; color:var(--text-900); }
+.mark-slot{ display:inline-flex; width:34px; flex:none; }
+.mark-slot svg, .mark-slot .art-img{ width:34px; height:34px; }
+.brand-name{ font-size:1.125rem; font-weight:600; letter-spacing:-.01em; }
+
+/* -- pil status: ikon + teks + warna, tidak pernah warna saja -- */
 .pill{
   display:inline-flex; align-items:center; gap:var(--sp-2);
   padding:6px 14px; border-radius:var(--r-full);
@@ -182,14 +180,28 @@ button,input{ font:inherit; color:inherit; }
   border:1px solid var(--teal-800); border-radius:var(--r-sm);
   background:var(--teal-700); color:#fff;
   padding:10px 18px; font-weight:500; font-size:var(--fs-small); line-height:1.2;
-  cursor:pointer;
+  cursor:pointer; text-decoration:none;
   transition:background-color var(--dur-2) var(--ease-standard),
              border-color var(--dur-2) var(--ease-standard),
              color var(--dur-2) var(--ease-standard);
 }
-.btn:hover{ background:var(--teal-800); }
+.btn:hover{ background:var(--teal-800); color:#fff; }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
 .btn .lucide{ width:18px; height:18px; }
+.btn-lg{ padding:13px 24px; font-size:var(--fs-body); }
+.btn-block{ width:100%; }
+
+.btn-outline{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2);
+  border:1px solid var(--teal-700); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--teal-700);
+  padding:10px 18px; font-weight:500; font-size:var(--fs-small); line-height:1.2;
+  cursor:pointer; text-decoration:none;
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard);
+}
+.btn-outline:hover{ background:var(--teal-50); }
+.btn-outline .lucide{ width:18px; height:18px; }
 
 .btn-ghost{
   display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2);
@@ -232,46 +244,211 @@ button,input{ font:inherit; color:inherit; }
   background:var(--surface); color:var(--text-900); font-size:var(--fs-body);
   transition:border-color var(--dur-2) var(--ease-standard);
 }
+.input.no-ic{ padding-left:14px; }
 .input::placeholder{ color:var(--text-500); }
 .input:hover{ border-color:#CFD6D4; }
 .input:focus-visible{ border-color:var(--teal-700); outline-offset:0; }
 
+.link{
+  background:none; border:0; padding:0; cursor:pointer;
+  color:var(--teal-700); font-weight:500; font-size:var(--fs-small);
+  text-decoration:none;
+}
+.link:hover{ text-decoration:underline; }
+
 /* =====================================================================
-   KERANGKA HALAMAN
+   TAMPILAN 1 · LANDING
    ===================================================================== */
-main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-7); }
-
-.intro{ margin-bottom:var(--sp-5); }
-.intro h1{ font-size:var(--fs-h1); line-height:var(--lh-h1); font-weight:600; letter-spacing:-.02em; }
-.intro p{ margin-top:var(--sp-2); color:var(--text-500); font-size:var(--fs-body); max-width:56ch; }
-
-/* -- tab dua fitur -------------------------------------------------- */
-.tabs{
-  display:inline-flex; gap:var(--sp-1); padding:var(--sp-1);
-  border:1px solid var(--hairline); border-radius:var(--r-full);
-  background:#F1F4F3; margin-bottom:var(--sp-5);
+.lnav{ border-bottom:1px solid var(--hairline); }
+.lnav-in{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4);
+  padding-top:var(--sp-4); padding-bottom:var(--sp-4);
 }
-.tab{
+.lnav-links{ display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap; }
+.nav-link{
+  background:none; border:0; cursor:pointer;
+  color:var(--text-600); font-weight:500; font-size:var(--fs-small);
+  padding:8px 10px; border-radius:var(--r-sm);
+  transition:color var(--dur-2) var(--ease-standard), background-color var(--dur-2) var(--ease-standard);
+}
+.nav-link:hover{ color:var(--teal-700); background:var(--teal-50); }
+
+.hero{
+  display:grid; grid-template-columns:1.15fr .85fr; gap:var(--sp-7);
+  align-items:center; padding:var(--sp-8) 0 var(--sp-7);
+}
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--teal-100); color:var(--teal-700);
+  border:1px solid #BFE3DD; border-radius:var(--r-full);
+  padding:6px 14px; font-size:.8125rem; font-weight:500;
+}
+.badge .lucide{ width:15px; height:15px; }
+.hero h1{
+  margin-top:var(--sp-4);
+  font-size:clamp(2.25rem, 4.5vw, 3rem); line-height:1.1;
+  font-weight:600; letter-spacing:-.02em;
+}
+.hero-sub{
+  margin-top:var(--sp-4); color:var(--text-500);
+  font-size:var(--fs-body-lg); line-height:var(--lh-body-lg); max-width:52ch;
+}
+.cta-row{ display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-5); }
+.trust{
+  display:flex; flex-wrap:wrap; gap:var(--sp-4); margin-top:var(--sp-5);
+  color:var(--text-500); font-size:var(--fs-small);
+}
+.trust span{ display:inline-flex; align-items:center; gap:6px; }
+.trust .lucide{ width:15px; height:15px; color:var(--teal-700); }
+.hero-art{ display:flex; justify-content:center; }
+.hero-art .art{ display:block; width:min(100%, 320px); }
+
+.land-section{ border-top:1px solid var(--hairline); padding:var(--sp-7) 0; }
+.land-section h2{ font-size:var(--fs-h2); line-height:var(--lh-h2); font-weight:600; letter-spacing:-.01em; }
+.sect-sub{ margin-top:var(--sp-2); color:var(--text-500); max-width:64ch; }
+.feat-duo{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4); margin-top:var(--sp-5); }
+
+/* kartu fitur (dipakai landing & dashboard) */
+.feat-card{
+  display:flex; flex-direction:column; gap:var(--sp-3);
+  border:1px solid var(--hairline); border-radius:var(--r-lg);
+  background:var(--surface); color:var(--text-900);
+  padding:var(--sp-6); min-height:200px; text-decoration:none;
+  transition:box-shadow var(--dur-2) var(--ease-standard),
+             background-color var(--dur-2) var(--ease-standard);
+}
+.feat-card:hover{ box-shadow:var(--shadow-hover); }
+.feat-card.filled{ background:var(--teal-700); border-color:var(--teal-800); color:#fff; }
+.feat-card.filled:hover{ background:var(--teal-800); }
+.feat-ic{
+  width:44px; height:44px; border-radius:var(--r-md); flex:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--teal-100); color:var(--teal-700);
+}
+.feat-card.filled .feat-ic{ background:rgba(255,255,255,.14); color:#fff; }
+.feat-ic .lucide{ width:22px; height:22px; }
+.feat-title{ font-size:var(--fs-h3); line-height:var(--lh-h3); font-weight:600; }
+.feat-desc{ color:var(--text-500); }
+.feat-card.filled .feat-desc{ color:#D9EEEA; }
+.feat-open{
+  margin-top:auto; display:inline-flex; align-items:center; gap:6px;
+  font-weight:500; font-size:var(--fs-small); color:var(--teal-700);
+}
+.feat-card.filled .feat-open{ color:#fff; }
+.feat-open .lucide{ width:16px; height:16px; }
+
+/* =====================================================================
+   TAMPILAN 2 & 3 · MASUK / DAFTAR (mock visual, tanpa auth nyata)
+   ===================================================================== */
+.auth{
+  display:grid; grid-template-columns:minmax(0,460px) minmax(0,1fr);
+  gap:var(--sp-8); align-items:center;
+  padding-top:var(--sp-7); padding-bottom:var(--sp-8);
+}
+.auth-brand{ margin-bottom:var(--sp-6); }
+.auth h1{ font-size:var(--fs-h1); line-height:var(--lh-h1); font-weight:600; letter-spacing:-.02em; }
+.auth-sub{ margin-top:var(--sp-2); color:var(--text-500); }
+.auth-alt{ display:flex; flex-direction:column; gap:var(--sp-2); margin-top:var(--sp-5); }
+.auth-btn{ justify-content:center; padding:12px 16px; }
+.g-mono{
+  width:20px; height:20px; border-radius:var(--r-full); flex:none;
+  border:1.5px solid currentColor;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600;
+}
+.divider{
+  display:flex; align-items:center; gap:var(--sp-3); margin:var(--sp-5) 0;
+  color:var(--text-500); font-size:var(--fs-label); font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.divider::before, .divider::after{ content:""; flex:1; height:1px; background:var(--hairline); }
+.field{ display:flex; flex-direction:column; gap:6px; margin-bottom:var(--sp-4); }
+.field label{
+  font-size:var(--fs-label); line-height:var(--lh-label); font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--text-500);
+}
+.auth-links{ display:flex; justify-content:flex-end; margin:-6px 0 var(--sp-3); }
+.mini-note{ font-size:var(--fs-small); color:var(--text-500); margin-bottom:var(--sp-3); }
+.cross{ margin-top:var(--sp-5); font-size:var(--fs-small); color:var(--text-500); }
+.auth-art{ display:flex; justify-content:center; }
+.auth-art .art{ display:block; width:min(100%, 290px); }
+
+/* =====================================================================
+   TAMPILAN 4 · DASHBOARD
+   ===================================================================== */
+.dash-head{ border-bottom:1px solid var(--hairline); }
+.dash-head-in{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
+  padding-top:var(--sp-4); padding-bottom:var(--sp-4);
+}
+.user-chip{
   display:inline-flex; align-items:center; gap:var(--sp-2);
-  border:1px solid transparent; border-radius:var(--r-full);
-  background:transparent; color:var(--text-500);
-  padding:9px 18px; font-weight:500; font-size:var(--fs-small); cursor:pointer;
+  border:1px solid var(--hairline); border-radius:var(--r-full);
+  background:var(--surface); color:var(--text-600);
+  padding:5px 14px 5px 5px; font-size:var(--fs-small); font-weight:500;
+}
+.avatar{
+  width:30px; height:30px; border-radius:var(--r-full); flex:none;
+  background:var(--teal-100); color:var(--teal-700);
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.avatar .lucide{ width:16px; height:16px; }
+.dash-body{ padding-top:var(--sp-7); padding-bottom:var(--sp-8); }
+.dash-body h1{ font-size:var(--fs-h1); line-height:var(--lh-h1); font-weight:600; letter-spacing:-.02em; }
+.dash-sub{ margin-top:var(--sp-2); color:var(--text-500); }
+.dash-pills{ display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-top:var(--sp-6); }
+.dash-pill{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  border:1px solid var(--hairline); border-radius:var(--r-full);
+  background:var(--surface); color:var(--text-600);
+  padding:9px 18px; font-size:var(--fs-small); font-weight:500; cursor:pointer;
   transition:background-color var(--dur-2) var(--ease-standard),
-             color var(--dur-2) var(--ease-standard),
-             border-color var(--dur-2) var(--ease-standard);
+             border-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard);
 }
-.tab .lucide{ width:17px; height:17px; }
-.tab:hover{ color:var(--text-900); }
-.tab[aria-selected="true"]{
-  background:var(--surface); border-color:var(--hairline);
-  color:var(--teal-700); box-shadow:var(--shadow-hover);
+.dash-pill:hover{ border-color:var(--teal-700); color:var(--teal-700); }
+.dash-pill[aria-expanded="true"]{ background:var(--teal-100); border-color:var(--teal-700); color:var(--teal-700); }
+.dash-pill .lucide{ width:16px; height:16px; }
+.ph-panel{ margin-top:var(--sp-3); }
+.empty{
+  display:flex; flex-direction:column; align-items:center; gap:var(--sp-3);
+  text-align:center; color:var(--text-500); padding:var(--sp-6) var(--sp-4);
 }
-.tab-sub{ font-weight:400; color:var(--text-500); display:none; }
-@media(min-width:720px){ .tab-sub{ display:inline; } }
+.empty .lucide{ width:28px; height:28px; color:var(--teal-700); }
+.empty span{ font-size:var(--fs-small); }
+.set-row{ display:flex; justify-content:space-between; align-items:center; gap:var(--sp-4); flex-wrap:wrap; }
+.set-hint{ font-size:var(--fs-small); color:var(--text-500); }
+
+/* =====================================================================
+   BAR APLIKASI (Interpreter & HearMe)
+   ===================================================================== */
+.app-bar{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
+  flex-wrap:wrap; padding:var(--sp-4) 0; margin-bottom:var(--sp-5);
+  border-bottom:1px solid var(--hairline);
+}
+.bar-l{ display:flex; align-items:center; gap:var(--sp-3); min-width:0; }
+.bar-r{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.back{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:38px; height:38px; flex:none;
+  border:1px solid var(--hairline); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text-600);
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard),
+             color var(--dur-2) var(--ease-standard);
+}
+.back:hover{ border-color:var(--teal-700); color:var(--teal-700); background:var(--teal-50); }
+.back .lucide{ width:18px; height:18px; }
+.app-title{ font-size:var(--fs-h2); line-height:var(--lh-h2); font-weight:600; letter-spacing:-.01em; }
+.bar-sub{
+  font-size:var(--fs-label); font-weight:500; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--text-500);
+  border-left:1px solid var(--hairline); padding-left:var(--sp-3); white-space:nowrap;
+}
+.app-pad{ padding-bottom:var(--sp-7); }
 
 .duo{ display:grid; grid-template-columns:1.55fr 1fr; gap:var(--sp-5); align-items:start; }
-@media(max-width:960px){ .duo{ grid-template-columns:1fr; } }
-
 .stack{ display:flex; flex-direction:column; gap:var(--sp-4); }
 
 /* =====================================================================
@@ -371,7 +548,7 @@ main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-
 .alert strong{ font-weight:600; }
 
 /* =====================================================================
-   PANGGUNG GELAP (hero)
+   PANGGUNG GELAP (hero fitur)
    ===================================================================== */
 .stage{
   --focus:#7FDED2; /* cincin fokus versi terang di permukaan gelap */
@@ -396,7 +573,6 @@ main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-
   display:flex; align-items:center; justify-content:center;
   padding:var(--sp-5);
 }
-@media(max-width:960px){ .stage-body{ min-height:340px; } }
 
 .idle-hint{
   position:absolute; left:50%; bottom:var(--sp-4); transform:translateX(-50%);
@@ -486,7 +662,8 @@ main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-
   transition:transform var(--dur-3) var(--ease-standard),
              opacity var(--dur-3) var(--ease-standard);
 }
-.nova{ width:min(42vh,270px); height:auto; overflow:visible; }
+.nova, .nova-slot .art-img{ width:min(42vh,270px); height:auto; overflow:visible; }
+.nova-slot .art svg{ width:min(42vh,270px); }
 
 /* saat klip/teks tampil, Nova menepi ke pojok kiri bawah (state-transition) */
 .stage.live .nova-slot{ transform:translate(-31%,31%) scale(.36); opacity:.95; }
@@ -535,6 +712,7 @@ main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-
   font-size:var(--fs-body);
 }
 .cam-off .lucide{ width:32px; height:32px; color:var(--teal-300); }
+.cam-off .art{ width:64px; }
 .cam-off span{ font-size:var(--fs-small); color:var(--stage-muted); }
 .cam.cam-on .cam-off{ display:none; }
 
@@ -584,6 +762,25 @@ main{ max-width:1200px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-
 .det-note .lucide{ width:15px; height:15px; color:var(--teal-700); }
 
 .row-btns{ display:flex; gap:var(--sp-2); flex-wrap:wrap; margin-top:var(--sp-4); }
+
+/* riwayat frasa sesi (hanya di memori, hilang saat muat ulang) */
+.hist{ list-style:none; display:flex; flex-direction:column; gap:var(--sp-2); margin:0; padding:0; }
+.hist li{
+  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
+  border:1px solid var(--hairline); border-radius:var(--r-sm);
+  padding:9px 12px; font-size:var(--fs-small); color:var(--text-600);
+}
+.hist li.hist-empty{ border-style:dashed; color:var(--text-500); justify-content:flex-start; }
+.hist-play{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; flex:none; cursor:pointer;
+  border:1px solid var(--hairline); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--teal-700);
+  transition:background-color var(--dur-2) var(--ease-standard),
+             border-color var(--dur-2) var(--ease-standard);
+}
+.hist-play:hover{ background:var(--teal-50); border-color:var(--teal-700); }
+.hist-play .lucide{ width:15px; height:15px; }
 
 /* ikon ganda dalam tombol (mic/stop, kamera on/off, dst.) */
 .swap-b{ display:none; }
@@ -650,7 +847,12 @@ footer{
    ===================================================================== */
 @media (prefers-reduced-motion: no-preference){
 
-  /* 7) page-load-stagger — sekali saat muat, langkah 70ms */
+  /* pergantian tampilan: crossfade ~200ms (reduced: instan) */
+  html:not([data-reduce-motion="1"]) .view:not([hidden]){
+    animation:view-in var(--dur-3) var(--ease-standard);
+  }
+
+  /* 7) page-load-stagger — sekali saat tampil, langkah 70ms */
   html:not([data-reduce-motion="1"]) .rv{
     animation:pg-in var(--dur-4) var(--ease-decelerate) both;
     animation-delay:calc(var(--stg,0) * 70ms);
@@ -708,6 +910,7 @@ footer{
   html:not([data-reduce-motion="1"]) .meter>span{ transition:width var(--dur-4) var(--ease-decelerate); }
 }
 
+@keyframes view-in{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes pg-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 @keyframes cap-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
 @keyframes mic-ring{ from{ transform:scale(1); opacity:.55; } to{ transform:scale(1.55); opacity:0; } }
@@ -726,14 +929,19 @@ footer{
 /* =====================================================================
    RESPONSIF
    ===================================================================== */
+@media(max-width:960px){
+  .duo{ grid-template-columns:1fr; }
+  .hero{ grid-template-columns:1fr; padding-top:var(--sp-6); }
+  .auth{ grid-template-columns:1fr; }
+  .feat-duo{ grid-template-columns:1fr; }
+  .stage-body{ min-height:340px; }
+}
 @media(max-width:720px){
-  .site{ padding:var(--sp-3) var(--sp-4); }
-  main{ padding:var(--sp-5) var(--sp-4) var(--sp-6); }
+  .wrap{ padding-left:var(--sp-4); padding-right:var(--sp-4); }
   footer{ padding:var(--sp-4); }
-  .brand-tag{ display:none; }
-  .tabs{ width:100%; }
-  .tab{ flex:1; justify-content:center; }
   .stage-bar{ justify-content:center; }
+  .auth-art{ display:none; }
+  .bar-sub{ display:none; }
 }
 </style>
 </head>
@@ -741,312 +949,594 @@ footer{
 
 <a class="skip-link" href="#konten">Lewati ke konten utama</a>
 
-<header class="site rv" style="--stg:0">
-  <div class="brand">
-    <!-- logo mark: Nova mini (varian terang) -->
-    <svg class="mark" viewBox="0 0 48 48" role="img" aria-label="Logo Signova">
-      <line x1="24" y1="5" x2="24" y2="10" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="24" cy="4" r="2.4" fill="#0F766E"/>
-      <rect x="8" y="10" width="32" height="26" rx="9" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
-      <rect x="17" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
-      <rect x="27" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
-      <path d="M18 40 h12" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-    <span class="brand-name">Signova</span>
-    <span class="brand-tag">AI · BISINDO</span>
-  </div>
-  <div class="head-actions">
-    <button id="rmToggle" type="button" class="btn-ghost btn-sm" aria-pressed="false">
-      <i data-lucide="sparkles" aria-hidden="true"></i><span>Kurangi animasi</span>
-    </button>
-    <span id="statusPill" class="pill" data-state="idle" role="status">
-      <span class="pill-ic ic-idle"><i data-lucide="check" aria-hidden="true"></i></span>
-      <span class="pill-ic ic-listening"><i data-lucide="mic" aria-hidden="true"></i></span>
-      <span class="pill-ic ic-thinking"><i data-lucide="loader" aria-hidden="true"></i></span>
-      <span class="pill-ic ic-signing"><i data-lucide="hand" aria-hidden="true"></i></span>
-      <span class="pill-ic ic-error"><i data-lucide="info" aria-hidden="true"></i></span>
-      <span id="statusText">Siap</span>
-    </span>
-  </div>
-</header>
-
 <main id="konten">
 
   <noscript>
-    <div class="alert info" style="margin-bottom:24px">
-      <strong>JavaScript nonaktif.</strong>&nbsp;Demo interaktif Signova membutuhkan JavaScript;
-      teks halaman tetap dapat dibaca.
+    <div class="wrap" style="padding-top:16px">
+      <div class="alert info">
+        <strong>JavaScript nonaktif.</strong>&nbsp;Demo interaktif Signova membutuhkan JavaScript;
+        teks halaman tetap dapat dibaca.
+      </div>
     </div>
   </noscript>
 
-  <div class="intro rv" style="--stg:1">
-    <h1>Penerjemah dua arah BISINDO</h1>
-    <p>Suara menjadi isyarat, isyarat menjadi suara — agar layanan publik setara untuk Teman Tuli.</p>
-  </div>
-
-  <div class="tabs rv" style="--stg:2" role="tablist" aria-label="Fitur Signova">
-    <button class="tab" id="tab-interpreter" role="tab" aria-selected="true" aria-controls="panel-interpreter" type="button">
-      <i data-lucide="mic" aria-hidden="true"></i>
-      <span>Interpreter</span><span class="tab-sub">· suara → isyarat</span>
-    </button>
-    <button class="tab" id="tab-hearme" role="tab" aria-selected="false" aria-controls="panel-hearme" tabindex="-1" type="button">
-      <i data-lucide="hand" aria-hidden="true"></i>
-      <span>HearMe</span><span class="tab-sub">· isyarat → suara</span>
-    </button>
-  </div>
-
-  <!-- ================= PANEL 1 · INTERPRETER ================= -->
-  <section id="panel-interpreter" role="tabpanel" aria-labelledby="tab-interpreter">
-    <div class="duo">
-
-      <!-- Panggung isyarat (hero) -->
-      <section class="stage rv" style="--stg:3" id="signStage" aria-label="Panggung peragaan bahasa isyarat">
-        <div class="stage-top">
-          <span class="stage-eyebrow"><i data-lucide="hand" aria-hidden="true"></i>Avatar BISINDO</span>
-          <span class="stage-eyebrow">Nova</span>
-        </div>
-
-        <div class="stage-body">
-          <!-- Nova: komponen SVG terisolasi — tukar isi #novaSlot dengan avatar 3D kelak -->
-          <div class="nova-slot" id="novaSlot" data-state="idle">
-            <svg class="nova" viewBox="0 0 140 150" role="img" aria-label="Nova, robot penerjemah Signova">
-              <g class="nv-bob">
-                <line class="nv-ant" x1="70" y1="19" x2="70" y2="30"/>
-                <circle class="nv-ant-dot" cx="70" cy="14" r="4.5"/>
-                <rect class="nv-pod" x="18" y="52" width="8" height="20" rx="4"/>
-                <rect class="nv-pod" x="114" y="52" width="8" height="20" rx="4"/>
-                <rect class="nv-head" x="28" y="30" width="84" height="64" rx="20"/>
-                <rect class="nv-face" x="40" y="42" width="60" height="40" rx="12"/>
-                <rect class="nv-eye nv-eye-l" x="52" y="54" width="8" height="16" rx="4"/>
-                <rect class="nv-eye nv-eye-r" x="80" y="54" width="8" height="16" rx="4"/>
-                <path class="nv-mouth" d="M60 76 Q70 81 80 76"/>
-                <rect class="nv-body" x="48" y="98" width="44" height="26" rx="12"/>
-                <g class="nv-hand nv-hand-l"><circle cx="34" cy="116" r="9"/></g>
-                <g class="nv-hand nv-hand-r"><circle cx="106" cy="116" r="9"/></g>
-              </g>
+  <!-- ============================================================
+       TAMPILAN 1 · LANDING (#/)
+       ============================================================ -->
+  <section class="view" id="view-landing" aria-label="Beranda">
+    <nav class="lnav" aria-label="Navigasi utama">
+      <div class="wrap lnav-in">
+        <a class="brand" href="#/">
+          <span class="art mark-slot" data-art="logo">
+            <svg viewBox="0 0 48 48" role="img" aria-label="Logo Signova">
+              <line x1="24" y1="5" x2="24" y2="10" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="24" cy="4" r="2.4" fill="#0F766E"/>
+              <rect x="8" y="10" width="32" height="26" rx="9" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+              <rect x="17" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <rect x="27" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <path d="M18 40 h12" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
             </svg>
-          </div>
-
-          <video id="player" playsinline muted></video>
-
-          <div class="gloss-wrap" id="glossWrap" aria-hidden="true">
-            <div class="gloss-big" id="glossBig"></div>
-            <div class="gloss-sub" id="glossSub"></div>
-          </div>
-
-          <p class="idle-hint" id="idleHint">Tekan tombol mikrofon dan mulai bicara, atau ketik kalimat di panel kanan.<br>Urutan isyarat BISINDO diperagakan di sini.</p>
-
-          <span class="now" id="nowLabel"><i data-lucide="play" aria-hidden="true"></i><span id="nowText"></span></span>
+          </span>
+          <span class="brand-name">Signova AI</span>
+        </a>
+        <div class="lnav-links">
+          <button class="nav-link" type="button" data-scroll="fitur">Fitur</button>
+          <button class="nav-link" type="button" data-scroll="tentang">Tentang</button>
+          <a class="btn" href="#/masuk">Masuk</a>
         </div>
+      </div>
+    </nav>
 
-        <div class="stage-bar">
-          <fieldset class="speed">
-            <legend class="sr-only">Kecepatan peragaan avatar</legend>
-            <span class="speed-lab" aria-hidden="true"><i data-lucide="gauge"></i>Kecepatan</span>
-            <div class="seg">
-              <input class="sr-radio" type="radio" name="speed" id="sp75" value="0.75">
-              <label for="sp75">0,75×</label>
-              <input class="sr-radio" type="radio" name="speed" id="sp100" value="1" checked>
-              <label for="sp100">1×</label>
-              <input class="sr-radio" type="radio" name="speed" id="sp125" value="1.25">
-              <label for="sp125">1,25×</label>
-            </div>
-          </fieldset>
-          <button class="btn-stage" id="replayBtn" type="button" disabled>
-            <i data-lucide="rotate-ccw" aria-hidden="true"></i><span>Ulangi</span>
-          </button>
+    <div class="wrap">
+      <div class="hero">
+        <div>
+          <span class="badge rv" style="--stg:0"><i data-lucide="sparkles" aria-hidden="true"></i>Penerjemah Bahasa Isyarat Dua Arah Berbasis AI</span>
+          <h1 class="view-title rv" style="--stg:1" tabindex="-1">Komunikasi Tanpa Batas, Untuk&nbsp;Semua.</h1>
+          <p class="hero-sub rv" style="--stg:2">Signova mengubah ucapan menjadi peragaan isyarat BISINDO oleh avatar Nova, dan membaca isyarat menjadi suara — langsung dari peramban di loket layanan, tanpa aplikasi tambahan.</p>
+          <div class="cta-row rv" style="--stg:3">
+            <a class="btn btn-lg" href="#/interpreter"><i data-lucide="mic" aria-hidden="true"></i><span>Mulai Interpreter</span></a>
+            <a class="btn-outline btn-lg" href="#/hearme"><i data-lucide="hand" aria-hidden="true"></i><span>Coba HearMe</span></a>
+          </div>
+          <div class="trust rv" style="--stg:4">
+            <span><i data-lucide="accessibility" aria-hidden="true"></i>Dirancang bersama komunitas Tuli</span>
+            <span><i data-lucide="shield-check" aria-hidden="true"></i>Kontras WCAG 2.1 AA</span>
+            <span><i data-lucide="hand" aria-hidden="true"></i>BISINDO</span>
+          </div>
+        </div>
+        <div class="hero-art rv" style="--stg:5">
+          <span class="art" data-art="nova-hero" data-nova-light role="img" aria-label="Ilustrasi Nova, maskot robot Signova"></span>
+        </div>
+      </div>
+
+      <section class="land-section" id="fitur" aria-labelledby="fiturH">
+        <h2 id="fiturH">Dua arah, satu percakapan</h2>
+        <p class="sect-sub">Satu perangkat di loket, dua arah komunikasi: petugas berbicara, Teman Tuli berisyarat.</p>
+        <div class="feat-duo">
+          <a class="feat-card filled" href="#/interpreter">
+            <span class="feat-ic"><i data-lucide="mic" aria-hidden="true"></i></span>
+            <span class="feat-title">Interpreter</span>
+            <span class="feat-desc">Ucapan → Bahasa Isyarat. Avatar memperagakan BISINDO dari suara petugas.</span>
+            <span class="feat-open">Buka<i data-lucide="arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="feat-card" href="#/hearme">
+            <span class="feat-ic"><i data-lucide="hand" aria-hidden="true"></i></span>
+            <span class="feat-title">HearMe</span>
+            <span class="feat-desc">Bahasa Isyarat → Suara. Kamera mengenali isyarat dan mengubahnya menjadi ucapan.</span>
+            <span class="feat-open">Buka<i data-lucide="arrow-right" aria-hidden="true"></i></span>
+          </a>
         </div>
       </section>
 
-      <!-- Panel kontrol -->
-      <aside class="stack">
-
-        <div class="card mic-card rv" style="--stg:4">
-          <h3 class="card-label" style="justify-content:center"><i data-lucide="mic" aria-hidden="true"></i>Input Suara</h3>
-          <div class="mic-wrap">
-            <button id="micBtn" type="button" aria-pressed="false" aria-label="Mulai atau hentikan rekaman suara">
-              <i data-lucide="mic" class="swap-a" aria-hidden="true"></i>
-              <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
-            </button>
-            <small class="mic-hint" id="micHint">Ketuk untuk mulai merekam</small>
-          </div>
-          <div class="alert info" id="srAlert" hidden>
-            <i data-lucide="mic-off" aria-hidden="true"></i>
-            <div><strong>Browser ini tidak mendukung input suara.</strong> Gunakan Chrome, atau ketik pesan di bawah.</div>
-          </div>
-        </div>
-
-        <div class="card rv" style="--stg:5">
-          <h3 class="card-label"><i data-lucide="activity" aria-hidden="true"></i>Teks Ucapan · Live Caption</h3>
-          <div id="caption" class="caption-text is-empty" aria-live="polite">Ucapan Anda akan tampil di sini…</div>
-        </div>
-
-        <div class="card rv" style="--stg:6" id="glossCard">
-          <h3 class="card-label"><i data-lucide="hand" aria-hidden="true"></i>Urutan Gloss BISINDO</h3>
-          <div id="glossRow" class="chips"></div>
-          <p class="sr-only" id="procNote" role="status"></p>
-          <div class="cov">
-            <div class="cov-row"><span id="coverage">Cakupan kamus akan tampil setelah terjemahan.</span></div>
-            <div class="meter" aria-hidden="true"><span id="covBar"></span></div>
-          </div>
-        </div>
-
-        <div class="card rv" style="--stg:7">
-          <h3 class="card-label"><i data-lucide="keyboard" aria-hidden="true"></i>Ketik Pesan</h3>
-          <div class="type-row">
-            <span class="type-ic" aria-hidden="true"><i data-lucide="keyboard"></i></span>
-            <input id="typeInput" class="input" type="text" placeholder="Atau ketik pesan di sini…"
-                   aria-label="Ketik pesan untuk diterjemahkan">
-            <button class="btn" id="sendBtn" type="button">
-              <i data-lucide="send" aria-hidden="true"></i><span>Terjemahkan</span>
-            </button>
-          </div>
-          <div class="try-row">
-            <span class="try-label">Coba</span>
-            <button class="try" type="button" data-text="Selamat pagi, saya mau daftar periksa">"Selamat pagi, saya mau daftar periksa"</button>
-            <button class="try" type="button" data-text="Terima kasih, sampai jumpa">"Terima kasih, sampai jumpa"</button>
-          </div>
-          <div class="alert" id="netAlert" role="alert" hidden style="margin-top:16px">
-            <i data-lucide="wifi-off" aria-hidden="true"></i>
-            <div><strong>Tidak bisa menghubungi server.</strong> Pastikan uvicorn berjalan, lalu coba lagi.</div>
-          </div>
-        </div>
-
-      </aside>
+      <section class="land-section" id="tentang" aria-labelledby="tentangH">
+        <h2 id="tentangH">Tentang Signova</h2>
+        <p class="sect-sub">Signova AI adalah purwarupa penerjemah dua arah Bahasa Isyarat Indonesia (BISINDO) untuk layanan publik seperti puskesmas dan kantor pemerintahan. Dibangun untuk BizClash 3.0 dan divalidasi bersama komunitas Tuli, dengan komitmen aksesibilitas WCAG 2.1 AA. Pengenalan isyarat lewat kamera masih berupa simulasi demo; model penuh ada di peta jalan.</p>
+      </section>
     </div>
   </section>
 
-  <!-- ================= PANEL 2 · HEARME ================= -->
-  <section id="panel-hearme" role="tabpanel" aria-labelledby="tab-hearme" hidden>
-    <div class="duo">
+  <!-- ============================================================
+       TAMPILAN 2 · MASUK (#/masuk) — MOCK VISUAL, tanpa auth nyata
+       ============================================================ -->
+  <section class="view" id="view-masuk" hidden aria-label="Masuk">
+    <div class="wrap auth">
+      <div>
+        <a class="brand auth-brand" href="#/">
+          <span class="art mark-slot" data-art="logo">
+            <svg viewBox="0 0 48 48" role="img" aria-label="Logo Signova">
+              <line x1="24" y1="5" x2="24" y2="10" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="24" cy="4" r="2.4" fill="#0F766E"/>
+              <rect x="8" y="10" width="32" height="26" rx="9" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+              <rect x="17" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <rect x="27" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <path d="M18 40 h12" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="brand-name">Signova AI</span>
+        </a>
+        <h1 class="view-title" tabindex="-1">Selamat datang kembali!</h1>
+        <p class="auth-sub">Masuk untuk melanjutkan</p>
 
-      <!-- Kamera deteksi -->
-      <section class="stage cam" id="camStage" aria-label="Kamera deteksi bahasa isyarat">
-        <div class="stage-top">
-          <span class="stage-eyebrow"><i data-lucide="camera" aria-hidden="true"></i>Kamera HearMe</span>
-          <span class="stage-eyebrow">21 titik tangan</span>
+        <div class="auth-alt">
+          <button class="btn-ghost auth-btn" type="button" data-goto-btn="#/dashboard">
+            <span class="g-mono" aria-hidden="true">G</span><span>Masuk dengan Google</span>
+          </button>
+          <button class="btn-ghost auth-btn" type="button" data-focus="loginId">
+            <i data-lucide="mail" aria-hidden="true"></i><span>Masuk dengan Email</span>
+          </button>
         </div>
 
-        <div class="stage-body">
-          <video id="camVideo" playsinline muted></video>
+        <div class="divider" aria-hidden="true">atau masuk dengan</div>
 
-          <div class="cam-off" id="camOff">
-            <i data-lucide="camera-off" aria-hidden="true"></i>
-            <p>Kamera belum aktif.<br><span>Nyalakan kamera, lalu mulai deteksi isyarat.</span></p>
+        <form id="loginForm" data-goto="#/dashboard" novalidate>
+          <div class="field">
+            <label for="loginId">Email atau Nomor HP</label>
+            <input class="input no-ic" id="loginId" name="username" type="text" autocomplete="username" placeholder="nama@contoh.id">
+          </div>
+          <div class="field">
+            <label for="loginPw">Kata Sandi</label>
+            <input class="input no-ic" id="loginPw" name="password" type="password" autocomplete="current-password" placeholder="Kata sandi Anda">
+          </div>
+          <div class="auth-links">
+            <button class="link" type="button" id="forgotBtn">Lupa kata sandi?</button>
+          </div>
+          <p class="mini-note" id="forgotNote" role="status" hidden>Pemulihan kata sandi belum tersedia pada demo ini.</p>
+          <button class="btn btn-lg btn-block" type="submit">Masuk</button>
+        </form>
+
+        <p class="cross">Belum punya akun? <a class="link" href="#/daftar">Daftar</a></p>
+      </div>
+      <div class="auth-art">
+        <span class="art" data-art="nova-auth" data-nova-light role="img" aria-label="Ilustrasi Nova, maskot robot Signova"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAMPILAN 3 · DAFTAR (#/daftar) — MOCK VISUAL, tanpa auth nyata
+       ============================================================ -->
+  <section class="view" id="view-daftar" hidden aria-label="Buat akun">
+    <div class="wrap auth">
+      <div>
+        <a class="brand auth-brand" href="#/">
+          <span class="art mark-slot" data-art="logo">
+            <svg viewBox="0 0 48 48" role="img" aria-label="Logo Signova">
+              <line x1="24" y1="5" x2="24" y2="10" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="24" cy="4" r="2.4" fill="#0F766E"/>
+              <rect x="8" y="10" width="32" height="26" rx="9" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+              <rect x="17" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <rect x="27" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <path d="M18 40 h12" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="brand-name">Signova AI</span>
+        </a>
+        <h1 class="view-title" tabindex="-1">Buat akun baru</h1>
+        <p class="auth-sub">Mulai percakapan yang setara dalam beberapa langkah</p>
+
+        <div class="auth-alt">
+          <button class="btn-ghost auth-btn" type="button" data-goto-btn="#/dashboard">
+            <span class="g-mono" aria-hidden="true">G</span><span>Daftar dengan Google</span>
+          </button>
+        </div>
+
+        <div class="divider" aria-hidden="true">atau daftar dengan email</div>
+
+        <form id="regForm" data-goto="#/dashboard" novalidate>
+          <div class="field">
+            <label for="regName">Nama lengkap</label>
+            <input class="input no-ic" id="regName" name="name" type="text" autocomplete="name" placeholder="Nama Anda">
+          </div>
+          <div class="field">
+            <label for="regId">Email atau Nomor HP</label>
+            <input class="input no-ic" id="regId" name="username" type="text" autocomplete="username" placeholder="nama@contoh.id">
+          </div>
+          <div class="field">
+            <label for="regPw">Kata sandi</label>
+            <input class="input no-ic" id="regPw" name="new-password" type="password" autocomplete="new-password" placeholder="Minimal 8 karakter">
+          </div>
+          <div class="field">
+            <label for="regPw2">Konfirmasi kata Sandi</label>
+            <input class="input no-ic" id="regPw2" name="confirm-password" type="password" autocomplete="new-password" placeholder="Ulangi kata sandi">
+          </div>
+          <button class="btn btn-lg btn-block" type="submit">Daftar</button>
+        </form>
+
+        <p class="cross">Sudah punya akun? <a class="link" href="#/masuk">Masuk</a></p>
+      </div>
+      <div class="auth-art">
+        <span class="art" data-art="nova-auth" data-nova-light role="img" aria-label="Ilustrasi Nova, maskot robot Signova"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAMPILAN 4 · DASHBOARD (#/dashboard)
+       ============================================================ -->
+  <section class="view" id="view-dashboard" hidden aria-label="Dashboard">
+    <header class="dash-head">
+      <div class="wrap dash-head-in">
+        <a class="brand" href="#/">
+          <span class="art mark-slot" data-art="logo">
+            <svg viewBox="0 0 48 48" role="img" aria-label="Logo Signova">
+              <line x1="24" y1="5" x2="24" y2="10" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="24" cy="4" r="2.4" fill="#0F766E"/>
+              <rect x="8" y="10" width="32" height="26" rx="9" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+              <rect x="17" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <rect x="27" y="18" width="4" height="9" rx="2" fill="#0F766E"/>
+              <path d="M18 40 h12" stroke="#0F766E" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="brand-name">Signova AI</span>
+        </a>
+        <span class="user-chip">
+          <span class="avatar" aria-hidden="true"><i data-lucide="user"></i></span>
+          Loket Puskesmas 01
+        </span>
+      </div>
+    </header>
+
+    <div class="wrap dash-body">
+      <h1 class="view-title" tabindex="-1">Selamat datang</h1>
+      <p class="dash-sub">Pilih mode komunikasi untuk memulai percakapan.</p>
+
+      <div class="feat-duo">
+        <a class="feat-card filled rv" style="--stg:0" href="#/interpreter">
+          <span class="feat-ic"><i data-lucide="mic" aria-hidden="true"></i></span>
+          <span class="feat-title">Interpreter</span>
+          <span class="feat-desc">Ucapan → Bahasa Isyarat. Avatar memperagakan BISINDO dari suara petugas.</span>
+          <span class="feat-open">Buka<i data-lucide="arrow-right" aria-hidden="true"></i></span>
+        </a>
+        <a class="feat-card rv" style="--stg:1" href="#/hearme">
+          <span class="feat-ic"><i data-lucide="hand" aria-hidden="true"></i></span>
+          <span class="feat-title">HearMe</span>
+          <span class="feat-desc">Bahasa Isyarat → Suara. Kamera mengenali isyarat dan mengubahnya menjadi ucapan.</span>
+          <span class="feat-open">Buka<i data-lucide="arrow-right" aria-hidden="true"></i></span>
+        </a>
+      </div>
+
+      <div class="dash-pills">
+        <button class="dash-pill" id="pillRiwayat" type="button" aria-expanded="false" aria-controls="panelRiwayat">
+          <i data-lucide="history" aria-hidden="true"></i><span>Riwayat Percakapan</span>
+        </button>
+        <button class="dash-pill" id="pillPengaturan" type="button" aria-expanded="false" aria-controls="panelPengaturan">
+          <i data-lucide="settings" aria-hidden="true"></i><span>Pengaturan</span>
+        </button>
+      </div>
+
+      <div class="card ph-panel" id="panelRiwayat" hidden>
+        <h3 class="card-label"><i data-lucide="history" aria-hidden="true"></i>Riwayat Percakapan</h3>
+        <div class="empty">
+          <i data-lucide="inbox" aria-hidden="true"></i>
+          <p>Belum ada percakapan tersimpan.<br><span>Riwayat sesi akan muncul di sini pada versi mendatang.</span></p>
+        </div>
+      </div>
+
+      <div class="card ph-panel" id="panelPengaturan" hidden>
+        <h3 class="card-label"><i data-lucide="settings" aria-hidden="true"></i>Pengaturan</h3>
+        <div class="set-row">
+          <div>
+            <strong>Kurangi animasi</strong><br>
+            <span class="set-hint">Matikan gerakan dekoratif; semua status tetap ditampilkan dengan ikon + teks.</span>
+          </div>
+          <button class="btn-ghost btn-sm rm-toggle" type="button" aria-pressed="false">
+            <i data-lucide="sparkles" aria-hidden="true"></i><span>Kurangi animasi</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAMPILAN 5 · INTERPRETER (#/interpreter)
+       ============================================================ -->
+  <section class="view" id="view-interpreter" hidden aria-label="Interpreter">
+    <div class="wrap app-pad">
+
+      <div class="app-bar">
+        <div class="bar-l">
+          <a class="back" href="#/dashboard" aria-label="Kembali ke dashboard"><i data-lucide="arrow-left" aria-hidden="true"></i></a>
+          <h1 class="view-title app-title" tabindex="-1">Interpreter</h1>
+          <span class="bar-sub">Suara → Isyarat</span>
+        </div>
+        <div class="bar-r">
+          <button class="btn-ghost btn-sm rm-toggle" type="button" aria-pressed="false">
+            <i data-lucide="sparkles" aria-hidden="true"></i><span>Kurangi animasi</span>
+          </button>
+          <span class="pill js-status" data-state="idle" role="status">
+            <span class="pill-ic ic-idle"><i data-lucide="check" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-listening"><i data-lucide="mic" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-thinking"><i data-lucide="loader" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-signing"><i data-lucide="hand" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-error"><i data-lucide="info" aria-hidden="true"></i></span>
+            <span class="js-status-text">Siap</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="duo">
+
+        <!-- Panggung isyarat (hero) -->
+        <section class="stage rv" style="--stg:1" id="signStage" aria-label="Panggung peragaan bahasa isyarat">
+          <div class="stage-top">
+            <span class="stage-eyebrow"><i data-lucide="hand" aria-hidden="true"></i>Avatar BISINDO</span>
+            <span class="stage-eyebrow">Nova</span>
           </div>
 
-          <!-- kerangka tangan MediaPipe (21 landmark, 21 ruas) -->
-          <svg class="hand-svg" viewBox="0 0 100 100" aria-hidden="true">
-            <!-- telapak (statis) -->
-            <line class="bone" x1="50" y1="88" x2="39" y2="81"/>
-            <line class="bone" x1="50" y1="88" x2="42" y2="61"/>
-            <line class="bone" x1="50" y1="88" x2="65" y2="65"/>
-            <line class="bone" x1="42" y1="61" x2="50" y2="59"/>
-            <line class="bone" x1="50" y1="59" x2="58" y2="61"/>
-            <line class="bone" x1="58" y1="61" x2="65" y2="65"/>
-            <circle class="lm lm-wrist" cx="50" cy="88" r="2.6"/>
-            <circle class="lm" cx="42" cy="61" r="1.9"/>
-            <circle class="lm" cx="50" cy="59" r="1.9"/>
-            <circle class="lm" cx="58" cy="61" r="1.9"/>
-            <circle class="lm" cx="65" cy="65" r="1.9"/>
-            <!-- ibu jari -->
-            <g class="fgr">
-              <line class="bone" x1="39" y1="81" x2="31" y2="73"/>
-              <line class="bone" x1="31" y1="73" x2="25" y2="65"/>
-              <line class="bone" x1="25" y1="65" x2="20" y2="58"/>
-              <circle class="lm" cx="39" cy="81" r="1.9"/>
-              <circle class="lm" cx="31" cy="73" r="1.9"/>
-              <circle class="lm" cx="25" cy="65" r="1.9"/>
-              <circle class="lm" cx="20" cy="58" r="1.9"/>
-            </g>
-            <!-- telunjuk -->
-            <g class="fgr">
-              <line class="bone" x1="42" y1="61" x2="40" y2="49"/>
-              <line class="bone" x1="40" y1="49" x2="39" y2="40"/>
-              <line class="bone" x1="39" y1="40" x2="38" y2="32"/>
-              <circle class="lm" cx="40" cy="49" r="1.9"/>
-              <circle class="lm" cx="39" cy="40" r="1.9"/>
-              <circle class="lm" cx="38" cy="32" r="1.9"/>
-            </g>
-            <!-- jari tengah -->
-            <g class="fgr">
-              <line class="bone" x1="50" y1="59" x2="50" y2="45"/>
-              <line class="bone" x1="50" y1="45" x2="50" y2="35"/>
-              <line class="bone" x1="50" y1="35" x2="50" y2="27"/>
-              <circle class="lm" cx="50" cy="45" r="1.9"/>
-              <circle class="lm" cx="50" cy="35" r="1.9"/>
-              <circle class="lm" cx="50" cy="27" r="1.9"/>
-            </g>
-            <!-- jari manis -->
-            <g class="fgr">
-              <line class="bone" x1="58" y1="61" x2="59" y2="48"/>
-              <line class="bone" x1="59" y1="48" x2="60" y2="39"/>
-              <line class="bone" x1="60" y1="39" x2="61" y2="32"/>
-              <circle class="lm" cx="59" cy="48" r="1.9"/>
-              <circle class="lm" cx="60" cy="39" r="1.9"/>
-              <circle class="lm" cx="61" cy="32" r="1.9"/>
-            </g>
-            <!-- kelingking -->
-            <g class="fgr">
-              <line class="bone" x1="65" y1="65" x2="68" y2="55"/>
-              <line class="bone" x1="68" y1="55" x2="70" y2="47"/>
-              <line class="bone" x1="70" y1="47" x2="71" y2="41"/>
-              <circle class="lm" cx="68" cy="55" r="1.9"/>
-              <circle class="lm" cx="70" cy="47" r="1.9"/>
-              <circle class="lm" cx="71" cy="41" r="1.9"/>
-            </g>
-          </svg>
+          <div class="stage-body">
+            <!-- Nova: komponen SVG terisolasi — tukar isi slot dengan avatar 3D kelak -->
+            <div class="nova-slot" id="novaSlot" data-state="idle">
+              <span class="art" data-art="nova-stage">
+                <svg class="nova" viewBox="0 0 140 150" role="img" aria-label="Nova, robot penerjemah Signova">
+                  <g class="nv-bob">
+                    <line class="nv-ant" x1="70" y1="19" x2="70" y2="30"/>
+                    <circle class="nv-ant-dot" cx="70" cy="14" r="4.5"/>
+                    <rect class="nv-pod" x="18" y="52" width="8" height="20" rx="4"/>
+                    <rect class="nv-pod" x="114" y="52" width="8" height="20" rx="4"/>
+                    <rect class="nv-head" x="28" y="30" width="84" height="64" rx="20"/>
+                    <rect class="nv-face" x="40" y="42" width="60" height="40" rx="12"/>
+                    <rect class="nv-eye nv-eye-l" x="52" y="54" width="8" height="16" rx="4"/>
+                    <rect class="nv-eye nv-eye-r" x="80" y="54" width="8" height="16" rx="4"/>
+                    <path class="nv-mouth" d="M60 76 Q70 81 80 76"/>
+                    <rect class="nv-body" x="48" y="98" width="44" height="26" rx="12"/>
+                    <g class="nv-hand nv-hand-l"><circle cx="34" cy="116" r="9"/></g>
+                    <g class="nv-hand nv-hand-r"><circle cx="106" cy="116" r="9"/></g>
+                  </g>
+                </svg>
+              </span>
+            </div>
 
-          <span class="sim-tag"><i data-lucide="info" aria-hidden="true"></i>Simulasi demo</span>
-        </div>
+            <video id="player" playsinline muted></video>
 
-        <div class="stage-bar">
-          <button class="btn-stage" id="camBtn" type="button">
-            <i data-lucide="camera" class="swap-a" aria-hidden="true"></i>
-            <i data-lucide="camera-off" class="swap-b" aria-hidden="true"></i>
-            <span id="camBtnText">Nyalakan Kamera</span>
-          </button>
-          <button class="btn-stage is-primary" id="detectBtn" type="button">
-            <i data-lucide="hand" class="swap-a" aria-hidden="true"></i>
-            <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
-            <span id="detectBtnText">Mulai Deteksi</span>
-          </button>
-        </div>
-      </section>
+            <div class="gloss-wrap" id="glossWrap" aria-hidden="true">
+              <div class="gloss-big" id="glossBig"></div>
+              <div class="gloss-sub" id="glossSub"></div>
+            </div>
 
-      <!-- Hasil deteksi -->
-      <aside class="stack">
+            <p class="idle-hint" id="idleHint">Tekan tombol mikrofon dan mulai bicara, atau ketik kalimat di panel kanan.<br>Urutan isyarat BISINDO diperagakan di sini.</p>
 
-        <div class="card">
-          <h3 class="card-label"><i data-lucide="hand" aria-hidden="true"></i>Isyarat Terdeteksi</h3>
-          <div class="detected" aria-live="polite" aria-atomic="true">
-            <div class="det-gloss" id="detGloss">—</div>
-            <div class="det-conf">
-              <strong id="detPct">0%</strong>
-              <span>keyakinan</span>
+            <span class="now" id="nowLabel"><i data-lucide="play" aria-hidden="true"></i><span id="nowText"></span></span>
+          </div>
+
+          <div class="stage-bar">
+            <fieldset class="speed">
+              <legend class="sr-only">Kecepatan peragaan avatar</legend>
+              <span class="speed-lab" aria-hidden="true"><i data-lucide="gauge"></i>Kecepatan</span>
+              <div class="seg">
+                <input class="sr-radio" type="radio" name="speed" id="sp75" value="0.75">
+                <label for="sp75">0,75×</label>
+                <input class="sr-radio" type="radio" name="speed" id="sp100" value="1" checked>
+                <label for="sp100">1×</label>
+                <input class="sr-radio" type="radio" name="speed" id="sp125" value="1.25">
+                <label for="sp125">1,25×</label>
+              </div>
+            </fieldset>
+            <button class="btn-stage" id="replayBtn" type="button" disabled>
+              <i data-lucide="rotate-ccw" aria-hidden="true"></i><span>Ulangi</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Panel kontrol -->
+        <aside class="stack">
+
+          <div class="card mic-card rv" style="--stg:2">
+            <h3 class="card-label" style="justify-content:center"><i data-lucide="mic" aria-hidden="true"></i>Input Suara</h3>
+            <div class="mic-wrap">
+              <button id="micBtn" type="button" aria-pressed="false" aria-label="Mulai atau hentikan rekaman suara">
+                <i data-lucide="mic" class="swap-a" aria-hidden="true"></i>
+                <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
+              </button>
+              <small class="mic-hint" id="micHint">Ketuk untuk mulai merekam</small>
+            </div>
+            <div class="alert info" id="srAlert" hidden>
+              <i data-lucide="mic-off" aria-hidden="true"></i>
+              <div><strong>Browser ini tidak mendukung input suara.</strong> Gunakan Chrome, atau ketik pesan di bawah.</div>
             </div>
           </div>
-          <div class="meter" aria-hidden="true" style="margin-top:12px"><span id="confBar"></span></div>
-          <p class="det-note" id="detNote"><i data-lucide="info" aria-hidden="true"></i><span>Nyalakan kamera untuk mulai. Pengenalan isyarat versi pratinjau (disimulasikan).</span></p>
-        </div>
 
-        <div class="card">
-          <h3 class="card-label"><i data-lucide="volume-2" aria-hidden="true"></i>Hasil Terjemahan</h3>
-          <div id="hmChips" class="chips" style="margin-bottom:12px"></div>
-          <p id="hmText" class="caption-text is-empty" aria-live="polite">Kalimat hasil terjemahan akan tampil di sini…</p>
-          <div class="row-btns">
-            <button class="btn" id="speakBtn" type="button" disabled>
-              <i data-lucide="volume-2" class="swap-a" aria-hidden="true"></i>
-              <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
-              <span id="speakBtnText">Putar Suara</span>
+          <div class="card rv" style="--stg:3">
+            <h3 class="card-label"><i data-lucide="activity" aria-hidden="true"></i>Teks Ucapan · Live Caption</h3>
+            <div id="caption" class="caption-text is-empty" aria-live="polite">Ucapan Anda akan tampil di sini…</div>
+          </div>
+
+          <div class="card rv" style="--stg:4" id="glossCard">
+            <h3 class="card-label"><i data-lucide="hand" aria-hidden="true"></i>Urutan Gloss BISINDO</h3>
+            <div id="glossRow" class="chips"></div>
+            <p class="sr-only" id="procNote" role="status"></p>
+            <div class="cov">
+              <div class="cov-row"><span id="coverage">Cakupan kamus akan tampil setelah terjemahan.</span></div>
+              <div class="meter" aria-hidden="true"><span id="covBar"></span></div>
+            </div>
+          </div>
+
+          <div class="card rv" style="--stg:5">
+            <h3 class="card-label"><i data-lucide="keyboard" aria-hidden="true"></i>Ketik Pesan</h3>
+            <div class="type-row">
+              <span class="type-ic" aria-hidden="true"><i data-lucide="keyboard"></i></span>
+              <input id="typeInput" class="input" type="text" placeholder="Atau ketik pesan di sini…"
+                     aria-label="Ketik pesan untuk diterjemahkan">
+              <button class="btn" id="sendBtn" type="button">
+                <i data-lucide="send" aria-hidden="true"></i><span>Terjemahkan</span>
+              </button>
+            </div>
+            <div class="try-row">
+              <span class="try-label">Coba</span>
+              <button class="try" type="button" data-text="Selamat pagi, saya mau daftar periksa">"Selamat pagi, saya mau daftar periksa"</button>
+              <button class="try" type="button" data-text="Terima kasih, sampai jumpa">"Terima kasih, sampai jumpa"</button>
+            </div>
+            <div class="alert" id="netAlert" role="alert" hidden style="margin-top:16px">
+              <i data-lucide="wifi-off" aria-hidden="true"></i>
+              <div><strong>Tidak bisa menghubungi server.</strong> Pastikan uvicorn berjalan, lalu coba lagi.</div>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TAMPILAN 6 · HEARME (#/hearme)
+       ============================================================ -->
+  <section class="view" id="view-hearme" hidden aria-label="HearMe">
+    <div class="wrap app-pad">
+
+      <div class="app-bar">
+        <div class="bar-l">
+          <a class="back" href="#/dashboard" aria-label="Kembali ke dashboard"><i data-lucide="arrow-left" aria-hidden="true"></i></a>
+          <h1 class="view-title app-title" tabindex="-1">HearMe</h1>
+          <span class="bar-sub">Isyarat → Suara</span>
+        </div>
+        <div class="bar-r">
+          <button class="btn-ghost btn-sm rm-toggle" type="button" aria-pressed="false">
+            <i data-lucide="sparkles" aria-hidden="true"></i><span>Kurangi animasi</span>
+          </button>
+          <span class="pill js-status" data-state="idle" role="status">
+            <span class="pill-ic ic-idle"><i data-lucide="check" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-listening"><i data-lucide="mic" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-thinking"><i data-lucide="loader" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-signing"><i data-lucide="hand" aria-hidden="true"></i></span>
+            <span class="pill-ic ic-error"><i data-lucide="info" aria-hidden="true"></i></span>
+            <span class="js-status-text">Siap</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="duo">
+
+        <!-- Kamera deteksi -->
+        <section class="stage cam" id="camStage" aria-label="Kamera deteksi bahasa isyarat">
+          <div class="stage-top">
+            <span class="stage-eyebrow"><i data-lucide="camera" aria-hidden="true"></i>Kamera HearMe</span>
+            <span class="stage-eyebrow">21 titik tangan</span>
+          </div>
+
+          <div class="stage-body">
+            <video id="camVideo" playsinline muted></video>
+
+            <div class="cam-off" id="camOff">
+              <span class="art" data-art="nova-camera"><i data-lucide="camera-off" aria-hidden="true"></i></span>
+              <p>Kamera belum aktif.<br><span>Nyalakan kamera, lalu mulai deteksi isyarat.</span></p>
+            </div>
+
+            <!-- kerangka tangan MediaPipe (21 landmark, 21 ruas) -->
+            <svg class="hand-svg" viewBox="0 0 100 100" aria-hidden="true">
+              <!-- telapak (statis) -->
+              <line class="bone" x1="50" y1="88" x2="39" y2="81"/>
+              <line class="bone" x1="50" y1="88" x2="42" y2="61"/>
+              <line class="bone" x1="50" y1="88" x2="65" y2="65"/>
+              <line class="bone" x1="42" y1="61" x2="50" y2="59"/>
+              <line class="bone" x1="50" y1="59" x2="58" y2="61"/>
+              <line class="bone" x1="58" y1="61" x2="65" y2="65"/>
+              <circle class="lm lm-wrist" cx="50" cy="88" r="2.6"/>
+              <circle class="lm" cx="42" cy="61" r="1.9"/>
+              <circle class="lm" cx="50" cy="59" r="1.9"/>
+              <circle class="lm" cx="58" cy="61" r="1.9"/>
+              <circle class="lm" cx="65" cy="65" r="1.9"/>
+              <!-- ibu jari -->
+              <g class="fgr">
+                <line class="bone" x1="39" y1="81" x2="31" y2="73"/>
+                <line class="bone" x1="31" y1="73" x2="25" y2="65"/>
+                <line class="bone" x1="25" y1="65" x2="20" y2="58"/>
+                <circle class="lm" cx="39" cy="81" r="1.9"/>
+                <circle class="lm" cx="31" cy="73" r="1.9"/>
+                <circle class="lm" cx="25" cy="65" r="1.9"/>
+                <circle class="lm" cx="20" cy="58" r="1.9"/>
+              </g>
+              <!-- telunjuk -->
+              <g class="fgr">
+                <line class="bone" x1="42" y1="61" x2="40" y2="49"/>
+                <line class="bone" x1="40" y1="49" x2="39" y2="40"/>
+                <line class="bone" x1="39" y1="40" x2="38" y2="32"/>
+                <circle class="lm" cx="40" cy="49" r="1.9"/>
+                <circle class="lm" cx="39" cy="40" r="1.9"/>
+                <circle class="lm" cx="38" cy="32" r="1.9"/>
+              </g>
+              <!-- jari tengah -->
+              <g class="fgr">
+                <line class="bone" x1="50" y1="59" x2="50" y2="45"/>
+                <line class="bone" x1="50" y1="45" x2="50" y2="35"/>
+                <line class="bone" x1="50" y1="35" x2="50" y2="27"/>
+                <circle class="lm" cx="50" cy="45" r="1.9"/>
+                <circle class="lm" cx="50" cy="35" r="1.9"/>
+                <circle class="lm" cx="50" cy="27" r="1.9"/>
+              </g>
+              <!-- jari manis -->
+              <g class="fgr">
+                <line class="bone" x1="58" y1="61" x2="59" y2="48"/>
+                <line class="bone" x1="59" y1="48" x2="60" y2="39"/>
+                <line class="bone" x1="60" y1="39" x2="61" y2="32"/>
+                <circle class="lm" cx="59" cy="48" r="1.9"/>
+                <circle class="lm" cx="60" cy="39" r="1.9"/>
+                <circle class="lm" cx="61" cy="32" r="1.9"/>
+              </g>
+              <!-- kelingking -->
+              <g class="fgr">
+                <line class="bone" x1="65" y1="65" x2="68" y2="55"/>
+                <line class="bone" x1="68" y1="55" x2="70" y2="47"/>
+                <line class="bone" x1="70" y1="47" x2="71" y2="41"/>
+                <circle class="lm" cx="68" cy="55" r="1.9"/>
+                <circle class="lm" cx="70" cy="47" r="1.9"/>
+                <circle class="lm" cx="71" cy="41" r="1.9"/>
+              </g>
+            </svg>
+
+            <span class="sim-tag"><i data-lucide="info" aria-hidden="true"></i>Simulasi demo</span>
+          </div>
+
+          <div class="stage-bar">
+            <button class="btn-stage" id="camBtn" type="button">
+              <i data-lucide="camera" class="swap-a" aria-hidden="true"></i>
+              <i data-lucide="camera-off" class="swap-b" aria-hidden="true"></i>
+              <span id="camBtnText">Nyalakan Kamera</span>
             </button>
-            <button class="btn-ghost" id="hmClear" type="button">
-              <i data-lucide="trash-2" aria-hidden="true"></i><span>Hapus</span>
+            <button class="btn-stage is-primary" id="detectBtn" type="button">
+              <i data-lucide="hand" class="swap-a" aria-hidden="true"></i>
+              <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
+              <span id="detectBtnText">Mulai Deteksi</span>
             </button>
           </div>
-        </div>
+        </section>
 
-      </aside>
+        <!-- Hasil deteksi -->
+        <aside class="stack">
+
+          <div class="card">
+            <h3 class="card-label"><i data-lucide="hand" aria-hidden="true"></i>Isyarat Terdeteksi</h3>
+            <div class="detected" aria-live="polite" aria-atomic="true">
+              <div class="det-gloss" id="detGloss">—</div>
+              <div class="det-conf">
+                <strong id="detPct">0%</strong>
+                <span>keyakinan</span>
+              </div>
+            </div>
+            <div class="meter" aria-hidden="true" style="margin-top:12px"><span id="confBar"></span></div>
+            <p class="det-note" id="detNote"><i data-lucide="info" aria-hidden="true"></i><span>Nyalakan kamera untuk mulai. Pengenalan isyarat versi pratinjau (disimulasikan).</span></p>
+          </div>
+
+          <div class="card">
+            <h3 class="card-label"><i data-lucide="volume-2" aria-hidden="true"></i>Hasil Terjemahan</h3>
+            <div id="hmChips" class="chips" style="margin-bottom:12px"></div>
+            <p id="hmText" class="caption-text is-empty" aria-live="polite">Kalimat hasil terjemahan akan tampil di sini…</p>
+            <div class="row-btns">
+              <button class="btn" id="speakBtn" type="button" disabled>
+                <i data-lucide="volume-2" class="swap-a" aria-hidden="true"></i>
+                <i data-lucide="square" class="swap-b" aria-hidden="true"></i>
+                <span id="speakBtnText">Putar Suara</span>
+              </button>
+              <button class="btn-ghost" id="hmClear" type="button">
+                <i data-lucide="trash-2" aria-hidden="true"></i><span>Hapus</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-label"><i data-lucide="history" aria-hidden="true"></i>Frasa Sebelumnya</h3>
+            <ul class="hist" id="histList"></ul>
+          </div>
+
+        </aside>
+      </div>
     </div>
   </section>
 </main>
@@ -1055,6 +1545,38 @@ footer{
   <span>Signova AI — demo BizClash 3.0 · penerjemah dua arah BISINDO</span>
   <span class="srv" id="srvStatus"><span class="srv-dot" aria-hidden="true"></span><span id="srvText">Memeriksa server…</span></span>
 </footer>
+
+<!-- Ilustrasi Nova versi terang (dipakai hero & halaman auth via JS clone) -->
+<template id="novaLightTpl">
+  <svg viewBox="0 0 320 460" aria-hidden="true" focusable="false">
+    <rect x="14" y="14" width="292" height="432" rx="24" fill="#F2F8F7" stroke="#E7E9E8"/>
+    <ellipse cx="160" cy="398" rx="64" ry="10" fill="#E3EDEA"/>
+    <path d="M56 84 h16 M64 76 v16" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M252 128 h14 M259 121 v14" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M62 322 h12 M68 316 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="160" y1="74" x2="160" y2="92" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="160" cy="66" r="7" fill="#0F766E"/>
+    <rect x="74" y="128" width="12" height="34" rx="6" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    <rect x="234" y="128" width="12" height="34" rx="6" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    <rect x="88" y="92" width="144" height="108" rx="34" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
+    <rect x="108" y="116" width="104" height="62" rx="18" fill="#133029"/>
+    <rect x="134" y="132" width="10" height="26" rx="5" fill="#4BE0CF"/>
+    <rect x="176" y="132" width="10" height="26" rx="5" fill="#4BE0CF"/>
+    <path d="M146 166 Q160 173 174 166" stroke="#4BE0CF" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <rect x="150" y="200" width="20" height="14" rx="5" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    <rect x="104" y="212" width="112" height="110" rx="30" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
+    <circle cx="160" cy="258" r="17" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    <path d="M148 258 h5 l4 -9 5 18 4 -9 h6" stroke="#0F766E" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="102" y1="240" x2="80" y2="288" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="78" cy="300" r="14" fill="#D6F2EF" stroke="#0F766E" stroke-width="3"/>
+    <line x1="218" y1="240" x2="246" y2="198" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="250" cy="186" r="14" fill="#D6F2EF" stroke="#0F766E" stroke-width="3"/>
+    <rect x="126" y="322" width="20" height="46" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
+    <rect x="174" y="322" width="20" height="46" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
+    <rect x="116" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    <rect x="164" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+  </svg>
+</template>
 
 <script>
 'use strict';
@@ -1071,54 +1593,139 @@ function initIcons(){
 document.addEventListener('DOMContentLoaded', initIcons);
 window.addEventListener('load', initIcons);
 
-/* ---------- Tombol "kurangi animasi" (persisten) ---------- */
-(function(){
-  const btn = $('rmToggle');
-  const sync = () => btn.setAttribute('aria-pressed',
-    document.documentElement.getAttribute('data-reduce-motion') === '1' ? 'true' : 'false');
-  sync();
-  btn.addEventListener('click', () => {
-    const on = document.documentElement.getAttribute('data-reduce-motion') === '1';
-    document.documentElement.setAttribute('data-reduce-motion', on ? '' : '1');
-    try { localStorage.setItem('signova-rm', on ? '0' : '1'); } catch (e) {}
-    sync();
-  });
-})();
+/* ---------- Slot ilustrasi: klon SVG Nova terang, lalu coba PNG assets/ ----------
+   Jika frontend/assets/ berisi PNG (nova-hero.png, nova-auth.png, nova-stage.png,
+   nova-camera.png, logo.png), PNG menggantikan SVG bawaan di slot yang sama. */
+document.querySelectorAll('[data-nova-light]').forEach(slot => {
+  const tpl = $('novaLightTpl');
+  if (tpl) slot.appendChild(tpl.content.cloneNode(true));
+});
+const ART_SRC = {
+  'logo': 'assets/logo.png',
+  'nova-hero': 'assets/nova-hero.png',
+  'nova-auth': 'assets/nova-auth.png',
+  'nova-stage': 'assets/nova-stage.png',
+  'nova-camera': 'assets/nova-camera.png',
+};
+document.querySelectorAll('[data-art]').forEach(slot => {
+  const src = ART_SRC[slot.dataset.art];
+  if (!src) return;
+  const img = new Image();
+  img.onload = () => {              // 404 -> onerror diabaikan, fallback SVG bertahan
+    img.alt = slot.getAttribute('aria-label') || '';
+    img.className = 'art-img';
+    slot.replaceChildren(img);
+  };
+  img.src = src;
+});
+
+/* ---------- Tombol "kurangi animasi" (persisten, bisa muncul di beberapa tampilan) ---------- */
+const rmBtns = document.querySelectorAll('.rm-toggle');
+function syncRm(){
+  const on = document.documentElement.getAttribute('data-reduce-motion') === '1';
+  rmBtns.forEach(b => b.setAttribute('aria-pressed', String(on)));
+}
+rmBtns.forEach(btn => btn.addEventListener('click', () => {
+  const on = document.documentElement.getAttribute('data-reduce-motion') === '1';
+  document.documentElement.setAttribute('data-reduce-motion', on ? '' : '1');
+  try { localStorage.setItem('signova-rm', on ? '0' : '1'); } catch (e) {}
+  syncRm();
+}));
+syncRm();
 
 /* ---------- Mesin status global: Nova + pil (ikon + teks + warna serentak) ---------- */
 const STATE_TEXT = {
   idle: 'Siap', listening: 'Mendengarkan…', thinking: 'Memproses…',
   signing: 'Menerjemahkan', detecting: 'Mendeteksi…', error: 'Gangguan',
 };
+let currentState = 'idle';
 function setState(state, text){
-  $('statusPill').setAttribute('data-state', state);
-  $('statusText').textContent = text || STATE_TEXT[state] || state;
-  // Nova hanya memahami 4 state dirinya; state lain dipetakan ke idle/listening
+  currentState = state;
+  document.querySelectorAll('.js-status').forEach(p => {
+    p.setAttribute('data-state', state);
+    p.querySelector('.js-status-text').textContent = text || STATE_TEXT[state] || state;
+  });
   const novaMap = { idle:'idle', listening:'listening', thinking:'thinking', signing:'signing', detecting:'listening', error:'idle' };
   $('novaSlot').setAttribute('data-state', novaMap[state] || 'idle');
 }
 
-/* ---------- Tab dua fitur (pola WAI-ARIA tabs) ---------- */
-const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-function selectTab(tab){
-  tabs.forEach(t => {
-    const sel = t === tab;
-    t.setAttribute('aria-selected', String(sel));
-    t.tabIndex = sel ? 0 : -1;
-    document.getElementById(t.getAttribute('aria-controls')).hidden = !sel;
-  });
-  if (tab.id !== 'tab-hearme') stopDetect(true);   // tinggalkan HearMe -> hentikan simulasi deteksi
+/* =====================================================================
+   ROUTER HASH — 6 tampilan, tanpa pustaka router.
+   Navigasi memindahkan fokus ke judul tampilan (aksesibilitas keyboard).
+   ===================================================================== */
+const ROUTES = {
+  '/':            { id:'view-landing',     title:'Signova AI — Penerjemah Dua Arah BISINDO' },
+  '/masuk':       { id:'view-masuk',       title:'Masuk — Signova AI' },
+  '/daftar':      { id:'view-daftar',      title:'Buat Akun — Signova AI' },
+  '/dashboard':   { id:'view-dashboard',   title:'Dashboard — Signova AI' },
+  '/interpreter': { id:'view-interpreter', title:'Interpreter — Signova AI' },
+  '/hearme':      { id:'view-hearme',      title:'HearMe — Signova AI' },
+};
+function routeKey(){
+  const h = (location.hash || '#/').replace(/^#/, '');
+  return ROUTES[h] ? h : '/';
 }
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => selectTab(tab));
-  tab.addEventListener('keydown', e => {
-    const i = tabs.indexOf(tab);
-    let target = null;
-    if (e.key === 'ArrowRight') target = tabs[(i + 1) % tabs.length];
-    if (e.key === 'ArrowLeft')  target = tabs[(i - 1 + tabs.length) % tabs.length];
-    if (e.key === 'Home') target = tabs[0];
-    if (e.key === 'End')  target = tabs[tabs.length - 1];
-    if (target) { e.preventDefault(); target.focus(); selectTab(target); }
+function render(first){
+  const key = routeKey(), r = ROUTES[key];
+  document.querySelectorAll('.view').forEach(v => { v.hidden = (v.id !== r.id); });
+  document.title = r.title;
+
+  /* rapikan fitur yang ditinggalkan */
+  if (key !== '/hearme') stopDetect(true);
+  if (key !== '/interpreter') {
+    if (listening && rec) rec.stop();
+    seqId++;                           // batalkan urutan peragaan yang berjalan
+    nowHide(); hideGloss();
+    stage.classList.remove('live');
+    player.pause(); player.classList.remove('on');
+    if (currentState !== 'idle') setState('idle');
+  }
+
+  if (!first) {
+    window.scrollTo(0, 0);
+    const h = document.getElementById(r.id).querySelector('.view-title');
+    if (h) h.focus();
+  }
+}
+window.addEventListener('hashchange', () => render(false));
+
+/* tautan "Fitur"/"Tentang" di landing: gulir halus tanpa mengubah hash */
+document.querySelectorAll('[data-scroll]').forEach(b => b.addEventListener('click', () => {
+  const el = document.getElementById(b.dataset.scroll);
+  if (!el) return;
+  const smooth = matchMedia('(prefers-reduced-motion: no-preference)').matches
+    && document.documentElement.getAttribute('data-reduce-motion') !== '1';
+  el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+}));
+
+/* =====================================================================
+   AUTENTIKASI — MOCK VISUAL SAJA.
+   Tidak ada autentikasi nyata, tidak ada penyimpanan kredensial,
+   tanpa localStorage; tombol hanya berpindah tampilan.
+   PEKERJAAN MASA DEPAN: integrasi auth sungguhan (OAuth/OIDC + backend).
+   ===================================================================== */
+document.querySelectorAll('form[data-goto]').forEach(f => f.addEventListener('submit', e => {
+  e.preventDefault();
+  location.hash = f.dataset.goto;
+}));
+document.querySelectorAll('[data-goto-btn]').forEach(b => b.addEventListener('click', () => {
+  location.hash = b.dataset.gotoBtn;
+}));
+document.querySelectorAll('[data-focus]').forEach(b => b.addEventListener('click', () => {
+  const el = $(b.dataset.focus); if (el) el.focus();
+}));
+$('forgotBtn').addEventListener('click', () => { $('forgotNote').hidden = false; });
+
+/* ---------- Dashboard: panel placeholder Riwayat & Pengaturan ---------- */
+[['pillRiwayat','panelRiwayat'], ['pillPengaturan','panelPengaturan']].forEach(([btnId, panelId]) => {
+  $(btnId).addEventListener('click', () => {
+    const willOpen = $(panelId).hidden;
+    ['panelRiwayat','panelPengaturan'].forEach(p => { $(p).hidden = true; });
+    ['pillRiwayat','pillPengaturan'].forEach(b => { $(b).setAttribute('aria-expanded','false'); });
+    if (willOpen) {
+      $(panelId).hidden = false;
+      $(btnId).setAttribute('aria-expanded','true');
+    }
   });
 });
 
@@ -1163,7 +1770,7 @@ function setListening(on){
                                 : (rec ? 'Ketuk untuk mulai merekam' : 'Input suara tidak tersedia — gunakan ketik');
   if (on) setState('listening');
   // jangan menimpa status "memproses/menerjemahkan" ketika mic berhenti otomatis
-  else if (wasListening && $('statusPill').getAttribute('data-state') === 'listening') setState('idle');
+  else if (wasListening && currentState === 'listening') setState('idle');
 }
 
 $('micBtn').addEventListener('click', () => {
@@ -1194,7 +1801,7 @@ document.querySelectorAll('.try').forEach(b => b.addEventListener('click', () =>
   $('sendBtn').click();
 }));
 
-/* ---------- Kecepatan avatar ---------- */
+/* ---------- Kecepatan avatar (mengubah playbackRate video sungguhan) ---------- */
 function speedVal(){
   const r = document.querySelector('input[name="speed"]:checked');
   return r ? parseFloat(r.value) : 1;
@@ -1349,20 +1956,57 @@ function hideGloss(){
 
 /* =====================================================================
    HEARME — isyarat -> suara.
-   Kamera nyata (getUserMedia); pengenalan isyarat DISIMULASIKAN untuk
-   demo (belum ada endpoint model di backend) dan diberi label jujur
-   "Simulasi demo". Keluaran suara memakai Web Speech Synthesis (id-ID).
+   Kamera nyata (getUserMedia); keluaran suara Web Speech Synthesis (id-ID).
+   Pengenalan isyarat DISIMULASIKAN dan diberi label jujur "Simulasi demo".
    ===================================================================== */
 const camStage = $('camStage');
 const camVideo = $('camVideo');
 let camStream = null;
-let detecting = false, detectTimer = null, phraseIdx = 0;
+let detecting = false;
 
 const DEMO_PHRASES = [
   { glosses: ['halo', 'saya', 'mau', 'daftar', 'periksa'], sentence: 'Halo, saya mau daftar periksa.' },
   { glosses: ['saya', 'sakit', 'tolong', 'bantu'],          sentence: 'Saya sakit, tolong bantu.' },
   { glosses: ['saya', 'mau', 'bayar', 'berapa'],            sentence: 'Saya mau bayar, berapa?' },
 ];
+
+/* ---- Pengenal isyarat -------------------------------------------------
+   PEKERJAAN MASA DEPAN: ganti `simulatedRecognizer` dengan implementasi
+   nyata yang mengirim frame kamera ke `POST /recognize` dan menerima
+   {gloss, confidence}. Antarmuka yang dipakai UI hanya start()/stop():
+     recognizer.start({ onSign(gloss, confidence), onDone(sentence) })
+     recognizer.stop()
+   ------------------------------------------------------------------- */
+const simulatedRecognizer = {
+  _timer: null, _running: false, _phraseIdx: 0,
+  start(handlers){
+    this._running = true;
+    const phrase = DEMO_PHRASES[this._phraseIdx % DEMO_PHRASES.length];
+    const confs = phrase.glosses.map(() => 88 + Math.round(Math.random() * 9));
+    let i = 0;
+    const step = () => {
+      if (!this._running) return;
+      handlers.onSign(phrase.glosses[i], confs[i]);
+      i++;
+      if (i < phrase.glosses.length) {
+        this._timer = setTimeout(step, 1700);
+      } else {
+        this._timer = setTimeout(() => {
+          if (!this._running) return;
+          this._phraseIdx++;
+          this._running = false;
+          handlers.onDone(phrase.sentence);
+        }, 1200);
+      }
+    };
+    this._timer = setTimeout(step, 900);
+  },
+  stop(){
+    this._running = false;
+    if (this._timer) { clearTimeout(this._timer); this._timer = null; }
+  },
+};
+const recognizer = simulatedRecognizer;
 
 function detNote(text){ $('detNote').querySelector('span').textContent = text; }
 
@@ -1411,54 +2055,75 @@ function startDetect(){
   setState('detecting');
   detNote('Mendeteksi gerakan tangan…');
 
-  const phrase = DEMO_PHRASES[phraseIdx % DEMO_PHRASES.length];
-  const confs = phrase.glosses.map(() => 88 + Math.round(Math.random() * 9));
-  let i = 0;
+  recognizer.start({
+    onSign(gloss, conf){
+      const g = $('detGloss');
+      g.textContent = gloss;
+      g.classList.remove('cap-in'); void g.offsetWidth; g.classList.add('cap-in');
+      $('detPct').textContent = conf + '%';
+      $('confBar').style.width = conf + '%';
 
-  const step = () => {
-    if (!detecting) return;
-    const gloss = phrase.glosses[i], conf = confs[i];
-    const g = $('detGloss');
-    g.textContent = gloss;
-    g.classList.remove('cap-in'); void g.offsetWidth; g.classList.add('cap-in');
-    $('detPct').textContent = conf + '%';
-    $('confBar').style.width = conf + '%';
-
-    const chip = document.createElement('span');
-    chip.className = 'chip active';
-    chip.textContent = gloss;
-    document.querySelectorAll('#hmChips .chip').forEach(c => c.classList.remove('active'));
-    $('hmChips').appendChild(chip);
-
-    i++;
-    if (i < phrase.glosses.length) { detectTimer = setTimeout(step, 1700); }
-    else { detectTimer = setTimeout(() => finishDetect(phrase), 1200); }
-  };
-  detectTimer = setTimeout(step, 900);
+      const chip = document.createElement('span');
+      chip.className = 'chip active';
+      chip.textContent = gloss;
+      document.querySelectorAll('#hmChips .chip').forEach(c => c.classList.remove('active'));
+      $('hmChips').appendChild(chip);
+    },
+    onDone(sentence){ finishDetect(sentence); },
+  });
 }
 
-function finishDetect(phrase){
-  phraseIdx++;
+function finishDetect(sentence){
   stopDetect(true);
   const t = $('hmText');
-  t.textContent = phrase.sentence;
+  t.textContent = sentence;
   t.classList.remove('is-empty');
   t.classList.remove('cap-in'); void t.offsetWidth; t.classList.add('cap-in');
   $('speakBtn').disabled = false;
   document.querySelectorAll('#hmChips .chip').forEach(c => c.classList.remove('active'));
+  sessionHistory.push(sentence);          // hanya di memori — hilang saat muat ulang
+  renderHistory();
   detNote('Deteksi selesai — tekan "Putar Suara" untuk membacakan.');
 }
 
 function stopDetect(silent){
-  if (detectTimer) { clearTimeout(detectTimer); detectTimer = null; }
+  recognizer.stop();
   if (!detecting) return;
   detecting = false;
   camStage.classList.remove('detecting');
   $('detectBtn').classList.remove('is-active');
   $('detectBtn').classList.add('is-primary');
   $('detectBtnText').textContent = 'Mulai Deteksi';
-  if ($('statusPill').getAttribute('data-state') === 'detecting') setState('idle');
+  if (currentState === 'detecting') setState('idle');
   if (!silent) detNote('Deteksi dihentikan.');
+}
+
+/* ---------- Riwayat frasa sesi (in-memory, reset saat muat ulang) ---------- */
+const sessionHistory = [];
+function renderHistory(){
+  const ul = $('histList');
+  ul.innerHTML = '';
+  if (!sessionHistory.length) {
+    const li = document.createElement('li');
+    li.className = 'hist-empty';
+    li.textContent = 'Belum ada frasa pada sesi ini.';
+    ul.appendChild(li);
+    return;
+  }
+  sessionHistory.slice().reverse().forEach(sentence => {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+    span.textContent = sentence;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hist-play';
+    btn.setAttribute('aria-label', 'Putar suara: ' + sentence);
+    btn.innerHTML = '<i data-lucide="volume-2" aria-hidden="true"></i>';
+    btn.addEventListener('click', () => speakText(sentence));
+    li.appendChild(span); li.appendChild(btn);
+    ul.appendChild(li);
+  });
+  initIcons();   // ikon pada tombol putar yang baru dibuat
 }
 
 /* ---------- Keluaran suara (Web Speech Synthesis, id-ID) ---------- */
@@ -1470,22 +2135,26 @@ if ('speechSynthesis' in window) {
   $('speakBtnText').textContent = 'Suara tidak didukung';
 }
 
+function speakText(text, onEnd){
+  if (!('speechSynthesis' in window) || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'id-ID';
+  const v = speechSynthesis.getVoices().find(x => (x.lang || '').toLowerCase().startsWith('id'));
+  if (v) u.voice = v;
+  if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
+  speechSynthesis.speak(u);
+}
+
 $('speakBtn').addEventListener('click', () => {
   if (!('speechSynthesis' in window)) return;
   if (speaking) { speechSynthesis.cancel(); resetSpeakBtn(); return; }
   const text = $('hmText').textContent.trim();
   if (!text || $('hmText').classList.contains('is-empty')) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'id-ID';
-  const v = speechSynthesis.getVoices().find(v => (v.lang || '').toLowerCase().startsWith('id'));
-  if (v) u.voice = v;
-  u.onend = resetSpeakBtn;
-  u.onerror = resetSpeakBtn;
   speaking = true;
   $('speakBtn').classList.add('is-active');
   $('speakBtnText').textContent = 'Berhenti';
-  speechSynthesis.speak(u);
+  speakText(text, resetSpeakBtn);
 });
 function resetSpeakBtn(){
   speaking = false;
@@ -1521,6 +2190,10 @@ $('hmClear').addEventListener('click', () => {
     txt.textContent = 'Server tidak terhubung';
   }
 })();
+
+/* ---------- Mulai ---------- */
+renderHistory();
+render(true);
 </script>
 </body>
 </html>
