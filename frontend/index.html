@@ -295,7 +295,7 @@ main{ padding:0; }
 }
 .cta-row{ display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-5); }
 .hero-art{ display:flex; justify-content:flex-end; }
-.hero-art .art{ display:block; width:min(100%, 400px); }
+.hero-art .art{ display:block; width:min(100%, 480px); }
 
 .land-section{ border-top:1px solid var(--hairline); padding:var(--sp-7) 0; }
 .land-section h2{ font-size:var(--fs-h2); line-height:var(--lh-h2); font-weight:600; letter-spacing:-.01em; }
@@ -365,7 +365,7 @@ main{ padding:0; }
 .mini-note{ font-size:var(--fs-small); color:var(--text-500); margin-bottom:var(--sp-3); }
 .cross{ margin-top:var(--sp-5); font-size:var(--fs-small); color:var(--text-500); }
 .auth-art{ display:flex; justify-content:center; }
-.auth-art .art{ display:block; width:min(100%, 290px); }
+.auth-art .art{ display:block; width:min(100%, 340px); }
 
 /* =====================================================================
    TAMPILAN 4 · DASHBOARD
@@ -1532,12 +1532,14 @@ main{ padding:0; }
 
 <!-- Ilustrasi Nova versi terang (dipakai hero & halaman auth via JS clone) -->
 <template id="novaLightTpl">
-  <svg viewBox="0 0 320 460" aria-hidden="true" focusable="false">
-    <rect x="14" y="14" width="292" height="432" rx="24" fill="#F2F8F7" stroke="#E7E9E8"/>
+  <svg viewBox="0 0 440 460" aria-hidden="true" focusable="false">
+    <rect x="14" y="14" width="412" height="432" rx="24" fill="#F2F8F7" stroke="#E7E9E8"/>
+    <path d="M50 92 h16 M58 84 v16" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M380 138 h14 M387 131 v14" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M64 330 h12 M70 324 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M372 306 h12 M378 300 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <g transform="translate(60 0)">
     <ellipse cx="160" cy="398" rx="64" ry="10" fill="#E3EDEA"/>
-    <path d="M56 84 h16 M64 76 v16" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M252 128 h14 M259 121 v14" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M62 322 h12 M68 316 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
     <line x1="160" y1="74" x2="160" y2="92" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
     <circle cx="160" cy="66" r="7" fill="#0F766E"/>
     <rect x="74" y="128" width="12" height="34" rx="6" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
@@ -1573,6 +1575,7 @@ main{ padding:0; }
     <rect x="174" y="322" width="20" height="46" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
     <rect x="116" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
     <rect x="164" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    </g>
   </svg>
 </template>
 
