@@ -676,9 +676,10 @@ main{ padding:0; }
 .nova .nv-mouth{ fill:none; stroke:#2FA79A; stroke-width:2; stroke-linecap:round;
   transition:stroke var(--dur-3) var(--ease-standard); }
 .nova .nv-body{ fill:#10312B; stroke:#2E6058; stroke-width:1.5; }
-.nova .nv-hand circle{ fill:#17423A; stroke:#3ED3C2; stroke-width:2; }
+.nova .hand-palm{ fill:#17423A; stroke:#3ED3C2; stroke-width:2; }
+.nova .hand-fgr{ fill:none; stroke:#3ED3C2; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
 .nova .nv-hand{
-  transform-box:fill-box; transform-origin:center;
+  transform-box:fill-box; transform-origin:50% 100%; /* poros lambaian di pergelangan */
   transition:transform var(--dur-3) var(--ease-standard);
 }
 
@@ -1249,8 +1250,24 @@ main{ padding:0; }
                     <rect class="nv-eye nv-eye-r" x="80" y="54" width="8" height="16" rx="4"/>
                     <path class="nv-mouth" d="M60 76 Q70 81 80 76"/>
                     <rect class="nv-body" x="48" y="98" width="44" height="26" rx="12"/>
-                    <g class="nv-hand nv-hand-l"><circle cx="34" cy="116" r="9"/></g>
-                    <g class="nv-hand nv-hand-r"><circle cx="106" cy="116" r="9"/></g>
+                    <!-- tangan artikulatif: telapak + 5 jari (path terpisah agar bisa
+                         dipose per jari kelak; kini hanya lambaian seluruh tangan) -->
+                    <g id="nova-hand-left" class="nv-hand nv-hand-l">
+                      <rect class="hand-palm" x="27" y="111" width="14" height="13" rx="5"/>
+                      <path class="hand-fgr f-index"  d="M29.5 111 V104"/>
+                      <path class="hand-fgr f-middle" d="M33 111 V102.5"/>
+                      <path class="hand-fgr f-ring"   d="M36.5 111 V103.5"/>
+                      <path class="hand-fgr f-pinky"  d="M40 111 V105.5"/>
+                      <path class="hand-fgr f-thumb"  d="M41 116 L45.5 112"/>
+                    </g>
+                    <g id="nova-hand-right" class="nv-hand nv-hand-r">
+                      <rect class="hand-palm" x="99" y="111" width="14" height="13" rx="5"/>
+                      <path class="hand-fgr f-index"  d="M110.5 111 V104"/>
+                      <path class="hand-fgr f-middle" d="M107 111 V102.5"/>
+                      <path class="hand-fgr f-ring"   d="M103.5 111 V103.5"/>
+                      <path class="hand-fgr f-pinky"  d="M100 111 V105.5"/>
+                      <path class="hand-fgr f-thumb"  d="M99 116 L94.5 112"/>
+                    </g>
                   </g>
                 </svg>
               </span>
@@ -1534,9 +1551,23 @@ main{ padding:0; }
     <circle cx="160" cy="258" r="17" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
     <path d="M148 258 h5 l4 -9 5 18 4 -9 h6" stroke="#0F766E" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     <line x1="102" y1="240" x2="80" y2="288" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="78" cy="300" r="14" fill="#D6F2EF" stroke="#0F766E" stroke-width="3"/>
+    <g class="nova-hand nova-hand-left">
+      <rect class="hand-palm" x="68" y="290" width="22" height="18" rx="8" fill="#D6F2EF" stroke="#0F766E" stroke-width="3"/>
+      <path class="hand-fgr f-index"  d="M72.5 308 V317"  fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-middle" d="M77.5 308 V319"  fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-ring"   d="M82.5 308 V317.5" fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-pinky"  d="M87 308 V315"    fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-thumb"  d="M90 296 L96.5 292" fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+    </g>
     <line x1="218" y1="240" x2="246" y2="198" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="250" cy="186" r="14" fill="#D6F2EF" stroke="#0F766E" stroke-width="3"/>
+    <g class="nova-hand nova-hand-right">
+      <rect class="hand-palm" x="239" y="180" width="22" height="18" rx="8" fill="#D6F2EF" stroke="#0F766E" stroke-width="3"/>
+      <path class="hand-fgr f-index"  d="M243.5 180 V171"  fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-middle" d="M248.5 180 V169"  fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-ring"   d="M253.5 180 V170.5" fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-pinky"  d="M258 180 V173"    fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+      <path class="hand-fgr f-thumb"  d="M239 185 L232.5 189" fill="none" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+    </g>
     <rect x="126" y="322" width="20" height="46" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
     <rect x="174" y="322" width="20" height="46" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
     <rect x="116" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
