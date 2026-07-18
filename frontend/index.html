@@ -683,6 +683,11 @@ main{ padding:0; }
   transition:transform var(--dur-3) var(--ease-standard);
 }
 
+/* ilustrasi Nova terang: kait animasi (statis penuh tanpa lapisan gerak) */
+.nl-eye{ transform-box:fill-box; transform-origin:center; }
+.nl-shadow{ transform-box:fill-box; transform-origin:center; }
+.art .nova-hand-right{ transform-box:fill-box; transform-origin:50% 100%; /* poros pergelangan */ }
+
 /* state Nova — info state selalu dobel lewat pil status berikon + teks */
 .nova-slot[data-state="listening"] .nv-ant-dot{ fill:var(--amber-500); }
 .nova-slot[data-state="listening"] .nv-mouth{ stroke:var(--amber-500); }
@@ -856,6 +861,16 @@ main{ padding:0; }
   html:not([data-reduce-motion="1"]) .nova .nv-bob{ animation:nv-bob 3s ease-in-out infinite; }
   html:not([data-reduce-motion="1"]) .nova .nv-eye{ animation:nv-blink 5.2s ease-in-out infinite; }
 
+  /* ilustrasi Nova terang (hero & auth): idle hidup */
+  html:not([data-reduce-motion="1"]) .art .nl-bob{ animation:nv-bob 3.2s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .art .nl-eye{ animation:nv-blink 5.6s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .art .nova-hand-right{ animation:nl-wave 1.6s ease-in-out infinite alternate; }
+  html:not([data-reduce-motion="1"]) .art .nl-shadow{ animation:nl-shadow 3.2s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .art .nl-spark{ animation:nl-twinkle 2.8s ease-in-out infinite; }
+  html:not([data-reduce-motion="1"]) .art .nl-spark:nth-of-type(2){ animation-delay:.7s; }
+  html:not([data-reduce-motion="1"]) .art .nl-spark:nth-of-type(3){ animation-delay:1.3s; }
+  html:not([data-reduce-motion="1"]) .art .nl-spark:nth-of-type(4){ animation-delay:1.9s; }
+
   /* 8) state-transition Nova */
   html:not([data-reduce-motion="1"]) .nova-slot[data-state="listening"] .nv-ant-dot{ animation:ant-pulse 1.4s ease-in-out infinite; }
   html:not([data-reduce-motion="1"]) .nova-slot[data-state="thinking"] .nv-ant-dot{ animation:ant-pulse 1.6s ease-in-out infinite; }
@@ -898,6 +913,9 @@ main{ padding:0; }
 @keyframes nv-wave-l{ from{ transform:translateY(-26px) rotate(-7deg); } to{ transform:translateY(-31px) rotate(7deg); } }
 @keyframes nv-wave-r{ from{ transform:translateY(-31px) rotate(7deg); } to{ transform:translateY(-26px) rotate(-7deg); } }
 @keyframes ant-pulse{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.5; transform:scale(1.4); } }
+@keyframes nl-wave{ from{ transform:rotate(-9deg); } to{ transform:rotate(9deg); } }
+@keyframes nl-shadow{ 0%,100%{ transform:scaleX(1); opacity:1; } 50%{ transform:scaleX(.92); opacity:.8; } }
+@keyframes nl-twinkle{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
 @keyframes lm-pulse{ 0%,100%{ transform:scale(1); opacity:.95; } 50%{ transform:scale(1.35); opacity:.55; } }
 @keyframes hand-drift{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 33%{ transform:translate(3px,-4px) rotate(1.2deg); } 66%{ transform:translate(-3px,3px) rotate(-1deg); } }
 @keyframes fgr-flex{ from{ transform:rotate(0deg); } to{ transform:rotate(2.4deg); } }
@@ -1534,20 +1552,21 @@ main{ padding:0; }
 <template id="novaLightTpl">
   <svg viewBox="0 0 440 460" aria-hidden="true" focusable="false">
     <rect x="14" y="14" width="412" height="432" rx="24" fill="#F2F8F7" stroke="#E7E9E8"/>
-    <path d="M50 92 h16 M58 84 v16" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M380 138 h14 M387 131 v14" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M64 330 h12 M70 324 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M372 306 h12 M378 300 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path class="nl-spark" d="M50 92 h16 M58 84 v16" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path class="nl-spark" d="M380 138 h14 M387 131 v14" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path class="nl-spark" d="M64 330 h12 M70 324 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
+    <path class="nl-spark" d="M372 306 h12 M378 300 v12" stroke="#7FDED2" stroke-width="2.5" stroke-linecap="round"/>
     <g transform="translate(60 0)">
-    <ellipse cx="160" cy="398" rx="64" ry="10" fill="#E3EDEA"/>
+    <ellipse class="nl-shadow" cx="160" cy="398" rx="64" ry="10" fill="#E3EDEA"/>
+    <g class="nl-bob">
     <line x1="160" y1="74" x2="160" y2="92" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
     <circle cx="160" cy="66" r="7" fill="#0F766E"/>
     <rect x="74" y="128" width="12" height="34" rx="6" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
     <rect x="234" y="128" width="12" height="34" rx="6" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
     <rect x="88" y="92" width="144" height="108" rx="34" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
     <rect x="108" y="116" width="104" height="62" rx="18" fill="#133029"/>
-    <rect x="134" y="132" width="10" height="26" rx="5" fill="#4BE0CF"/>
-    <rect x="176" y="132" width="10" height="26" rx="5" fill="#4BE0CF"/>
+    <rect class="nl-eye" x="134" y="132" width="10" height="26" rx="5" fill="#4BE0CF"/>
+    <rect class="nl-eye" x="176" y="132" width="10" height="26" rx="5" fill="#4BE0CF"/>
     <path d="M146 166 Q160 173 174 166" stroke="#4BE0CF" stroke-width="3" fill="none" stroke-linecap="round"/>
     <rect x="150" y="200" width="20" height="14" rx="5" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
     <rect x="104" y="212" width="112" height="110" rx="30" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
@@ -1575,6 +1594,7 @@ main{ padding:0; }
     <rect x="174" y="322" width="20" height="46" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="3"/>
     <rect x="116" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
     <rect x="164" y="364" width="40" height="14" rx="7" fill="#D6F2EF" stroke="#0F766E" stroke-width="2"/>
+    </g>
     </g>
   </svg>
 </template>
