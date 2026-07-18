@@ -294,8 +294,8 @@ main{ padding:0; }
   font-size:var(--fs-body-lg); line-height:var(--lh-body-lg); max-width:52ch;
 }
 .cta-row{ display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-5); }
-.hero-art{ display:flex; justify-content:center; }
-.hero-art .art{ display:block; width:min(100%, 320px); }
+.hero-art{ display:flex; justify-content:flex-end; }
+.hero-art .art{ display:block; width:min(100%, 400px); }
 
 .land-section{ border-top:1px solid var(--hairline); padding:var(--sp-7) 0; }
 .land-section h2{ font-size:var(--fs-h2); line-height:var(--lh-h2); font-weight:600; letter-spacing:-.01em; }
@@ -910,6 +910,7 @@ main{ padding:0; }
 @media(max-width:960px){
   .duo{ grid-template-columns:1fr; }
   .hero{ grid-template-columns:1fr; padding-top:var(--sp-6); }
+  .hero-art{ justify-content:center; }
   .auth{ grid-template-columns:1fr; }
   .feat-duo{ grid-template-columns:1fr; }
   .stage-body{ min-height:340px; }
