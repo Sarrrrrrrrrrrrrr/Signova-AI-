@@ -294,12 +294,6 @@ main{ padding:0; }
   font-size:var(--fs-body-lg); line-height:var(--lh-body-lg); max-width:52ch;
 }
 .cta-row{ display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:var(--sp-5); }
-.trust{
-  display:flex; flex-wrap:wrap; gap:var(--sp-4); margin-top:var(--sp-5);
-  color:var(--text-500); font-size:var(--fs-small);
-}
-.trust span{ display:inline-flex; align-items:center; gap:6px; }
-.trust .lucide{ width:15px; height:15px; color:var(--teal-700); }
 .hero-art{ display:flex; justify-content:center; }
 .hero-art .art{ display:block; width:min(100%, 320px); }
 
@@ -823,23 +817,6 @@ main{ padding:0; }
 .type-ic .lucide{ width:18px; height:18px; }
 
 /* =====================================================================
-   FOOTER
-   ===================================================================== */
-footer{
-  border-top:1px solid var(--hairline);
-  padding:var(--sp-4) var(--sp-6);
-  display:flex; justify-content:space-between; align-items:center; gap:var(--sp-3);
-  flex-wrap:wrap; font-size:var(--fs-small); color:var(--text-500);
-  max-width:1200px; margin:0 auto;
-}
-.srv{ display:inline-flex; align-items:center; gap:var(--sp-2); font-variant-numeric:tabular-nums; }
-.srv-dot{ width:8px; height:8px; border-radius:var(--r-full); background:#C4CCCA; flex:none; }
-.srv.ok .srv-dot{ background:var(--success); }
-.srv.bad .srv-dot{ background:var(--danger); }
-.srv.ok{ color:var(--teal-700); }
-.srv.bad{ color:var(--danger-ink); }
-
-/* =====================================================================
    LAPISAN GERAK — semua animasi hidup HANYA di sini.
    Dasar di atas = fallback statis (prefers-reduced-motion: reduce),
    dan tombol "kurangi animasi" (html[data-reduce-motion="1"]) ikut mematikan.
@@ -938,7 +915,6 @@ footer{
 }
 @media(max-width:720px){
   .wrap{ padding-left:var(--sp-4); padding-right:var(--sp-4); }
-  footer{ padding:var(--sp-4); }
   .stage-bar{ justify-content:center; }
   .auth-art{ display:none; }
   .bar-sub{ display:none; }
@@ -996,11 +972,6 @@ footer{
           <div class="cta-row rv" style="--stg:3">
             <a class="btn btn-lg" href="#/interpreter"><i data-lucide="mic" aria-hidden="true"></i><span>Mulai Interpreter</span></a>
             <a class="btn-outline btn-lg" href="#/hearme"><i data-lucide="hand" aria-hidden="true"></i><span>Coba HearMe</span></a>
-          </div>
-          <div class="trust rv" style="--stg:4">
-            <span><i data-lucide="accessibility" aria-hidden="true"></i>Dirancang bersama komunitas Tuli</span>
-            <span><i data-lucide="shield-check" aria-hidden="true"></i>Kontras WCAG 2.1 AA</span>
-            <span><i data-lucide="hand" aria-hidden="true"></i>BISINDO</span>
           </div>
         </div>
         <div class="hero-art rv" style="--stg:5">
@@ -1540,11 +1511,6 @@ footer{
     </div>
   </section>
 </main>
-
-<footer>
-  <span>Signova AI — demo BizClash 3.0 · penerjemah dua arah BISINDO</span>
-  <span class="srv" id="srvStatus"><span class="srv-dot" aria-hidden="true"></span><span id="srvText">Memeriksa server…</span></span>
-</footer>
 
 <!-- Ilustrasi Nova versi terang (dipakai hero & halaman auth via JS clone) -->
 <template id="novaLightTpl">
@@ -2175,21 +2141,6 @@ $('hmClear').addEventListener('click', () => {
   $('speakBtn').disabled = true;
   detNote('Hasil dihapus. Mulai deteksi untuk membaca isyarat baru.');
 });
-
-/* ---------- Cek server (GET /health, endpoint lama) ---------- */
-(async function(){
-  const el = $('srvStatus'), txt = $('srvText');
-  try {
-    const r = await fetch(API + '/health');
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    el.classList.add('ok');
-    txt.textContent = 'Server terhubung · kamus ' + (d.vocab_size || 0) + ' entri';
-  } catch (e) {
-    el.classList.add('bad');
-    txt.textContent = 'Server tidak terhubung';
-  }
-})();
 
 /* ---------- Mulai ---------- */
 renderHistory();
